@@ -28,18 +28,16 @@ const Test: React.FC = () => {
 
   return (
     <div>
-      <div>
-        <Select
-          placeholder="请选择"
-          mode="tags"
-          style={{ width: 500 }}
-          value={value}
-          onChange={(val: ValueItemProps[]) => {
-            setValue(val);
-          }}
-          onClick={() => console.log('this is click')}
-        />
-      </div>
+      <Select
+        placeholder="请选择"
+        mode="tags"
+        style={{ width: 500 }}
+        value={value}
+        onChange={(val: ValueItemProps[]) => {
+          setValue(val);
+        }}
+        onClick={() => console.log('this is click')}
+      />
       <Button onClick={addTag}>新增一个 tag</Button>
     </div>
   );

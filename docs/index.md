@@ -33,6 +33,7 @@ footer: Open-source MIT Licensed | Copyright © 2020<br />Powered by [dumi](http
 | style       | 样式        | React.CSSProperties            | {}     | 否       |
 | disabled    | 不可编辑    | boolean                        | false  | 否       |
 | onClick     | 点击事件    | () => void                     | -      | 否       |
+| addOnAfter  | 后缀        | string \| React.ReactNode      | -      | 否       |
 
 ### ValueItemProps
 

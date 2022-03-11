@@ -107,6 +107,7 @@ export interface SelectProps<ValueType = any, OptionType extends BaseOptionType 
   labelInValue?: boolean;
   value?: ValueType | null;
   defaultValue?: ValueType | null;
+  addOnAfter?: React.ReactNode;
   onChange?: (value: ValueType, option: OptionType | OptionType[]) => void;
 }
 
@@ -148,6 +149,7 @@ const Select = React.forwardRef(
       virtual,
       listHeight = 200,
       listItemHeight = 20,
+      addOnAfter,
 
       // Value
       value,
@@ -425,28 +427,40 @@ const Select = React.forwardRef(
     // ==============================================================
     return (
       <SelectContext.Provider value={selectContext}>
-        <BaseSelect
-          {...restProps}
-          // >>> MISC
-          id={mergedId}
-          prefixCls={prefixCls}
-          ref={ref}
-          omitDomProps={OMIT_DOM_PROPS}
-          mode={mode}
-          // >>> Values
-          displayValues={mergedValues}
-          onDisplayValuesChange={onDisplayValuesChange}
-          // >>> Search
-          searchValue={mergedSearchValue}
-          onSearch={onInternalSearch}
-          dropdownMatchSelectWidth={dropdownMatchSelectWidth}
-          // >>> OptionList
-          OptionList={OptionList}
-          emptyOptions={!displayOptions.length}
-          // >>> Accessibility
-          activeValue={activeValue}
-          activeDescendantId={`${mergedId}_list_${accessibilityIndex}`}
-        />
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          <BaseSelect
+            {...restProps}
+            // >>> MISC
+            id={mergedId}
+            prefixCls={prefixCls}
+            ref={ref}
+            omitDomProps={OMIT_DOM_PROPS}
+            mode={mode}
+            // >>> Values
+            displayValues={mergedValues}
+            onDisplayValuesChange={onDisplayValuesChange}
+            // >>> Search
+            searchValue={mergedSearchValue}
+            onSearch={onInternalSearch}
+            dropdownMatchSelectWidth={dropdownMatchSelectWidth}
+            // >>> OptionList
+            OptionList={OptionList}
+            emptyOptions={!displayOptions.length}
+            // >>> Accessibility
+            activeValue={activeValue}
+            activeDescendantId={`${mergedId}_list_${accessibilityIndex}`}
+          />
+          {addOnAfter && (
+            <div className="ant-input-group-addon" style={{ width: 'auto', padding: '7px 11px' }}>
+              {addOnAfter}
+            </div>
+          )}
+        </div>
       </SelectContext.Provider>
     );
   },

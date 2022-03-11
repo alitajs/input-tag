@@ -1,6 +1,6 @@
 {
   "name": "@alitajs/input-tag",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "files": [
     "dist",
     "es",
@@ -31,6 +31,7 @@
       "prettier --parser=typescript --write"
     ]
   },
+  "repository": "https://github.com/alitajs/select",
   "authors": [
     "hang1017 <437132124@qq.com> (https://github.com/hang1017)"
   ],
