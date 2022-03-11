@@ -1,7 +1,8 @@
 /* eslint-disable no-console */
 import React from 'react';
 import { Button } from 'antd';
-import Select, { ValueItemProps } from '@alitajs/input-tag';
+import type { ValueItemProps } from '@alitajs/input-tag';
+import Select from '@alitajs/input-tag';
 
 /**
  * 设置随机值
@@ -30,7 +31,7 @@ const Test: React.FC = () => {
       <div>
         <Select
           placeholder="请选择"
-          mode="combobox"
+          mode="tags"
           style={{ width: 500 }}
           value={value}
           onChange={(val: ValueItemProps[]) => {
