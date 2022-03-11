@@ -1,7 +1,7 @@
 {
-  "private": true,
   "name": "@alitajs/input-tag",
-  "version": "1.0.0",
+  "version": "1.0.3",
+  "files": ["es","lib"],
   "scripts": {
     "start": "dumi dev",
     "docs:build": "dumi build",
