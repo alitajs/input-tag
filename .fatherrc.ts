@@ -1,5 +1,11 @@
 export default {
   esm: 'babel',
   cjs: 'babel',
-  disableTypeCheck: true,
+  // umd: {
+  //   name: 'InputTag',
+  //   globals: {
+  //     react: 'React',
+  //   },
+  // },
+  // disableTypeCheck: true,
 };

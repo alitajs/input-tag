@@ -4,6 +4,7 @@ import canUseDom from 'rc-util/lib/Dom/canUseDom';
 let uuid = 0;
 
 /** Is client side and not jsdom */
+// @ts-ignore
 export const isBrowserClient = process.env.NODE_ENV !== 'test' && canUseDom();
 
 /** Get unique id for accessibility usage */

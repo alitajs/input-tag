@@ -836,6 +836,7 @@ const BaseSelect = React.forwardRef((props: BaseSelectProps, ref: React.Ref<Base
 });
 
 // Set display name for dev
+// @ts-ignore
 if (process.env.NODE_ENV !== 'production') {
   BaseSelect.displayName = 'BaseSelect';
 }

@@ -415,6 +415,7 @@ const Select = React.forwardRef(
     ]);
 
     // ========================== Warning ===========================
+    // @ts-ignore
     if (process.env.NODE_ENV !== 'production') {
       warningProps(props);
     }
@@ -451,6 +452,7 @@ const Select = React.forwardRef(
   },
 );
 
+// @ts-ignore
 if (process.env.NODE_ENV !== 'production') {
   Select.displayName = 'Select';
 }
