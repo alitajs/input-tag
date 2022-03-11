@@ -1,18 +1,16 @@
-# @alitajs/input-tag
+---
+title: input-tag
+group:
+  title: input-tag
+nav:
+  title: 组件
+  path: /usage
+  order: 2
+---
 
-## 简介
+## Demo
 
-可输入可设置 `tag` 的编辑框。
-
-## 开始使用
-
-```bash
-$ npm i @alitajs/input-tag
-
-or
-
-$ yarn add @alitajs/input-tag
-```
+<code src="../examples/usage.tsx">
 
 ## API
 

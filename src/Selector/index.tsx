@@ -13,7 +13,6 @@ import { useRef } from 'react';
 import KeyCode from 'rc-util/lib/KeyCode';
 import type { ScrollTo } from 'rc-virtual-list/lib/List';
 import MultipleSelector from './MultipleSelector';
-import SingleSelector from './SingleSelector';
 import useLock from '../hooks/useLock';
 import type { CustomTagProps, DisplayValueType, Mode, RenderNode } from '../BaseSelect';
 import { isValidateOpenKey } from '../utils/keyUtil';
@@ -245,12 +244,7 @@ const Selector: React.RefForwardingComponent<RefSelectorProps, SelectorProps> = 
     onInputCompositionEnd,
   };
 
-  const selectNode =
-    mode === 'multiple' || mode === 'tags' ? (
-      <MultipleSelector {...props} {...sharedProps} />
-    ) : (
-      <SingleSelector {...props} {...sharedProps} />
-    );
+  const selectNode = <MultipleSelector {...props} {...sharedProps} />;
 
   return (
     <div

@@ -1,16 +1,18 @@
 {
   "compilerOptions": {
     "target": "esnext",
+    "module": "esnext",
     "moduleResolution": "node",
-    "baseUrl": "./",
-    "jsx": "preserve",
-    "declaration": true,
-    "skipLibCheck": true,
+    "jsx": "react",
     "esModuleInterop": true,
+    "types": ["jest"],
+    "strict": true,
+    "skipLibCheck": true,
+    "declaration": true,
     "paths": {
       "@/*": ["src/*"],
       "@@/*": ["src/.umi/*"],
-      "rc-select": ["src/index.ts"]
+      "@alitajs/input-tag": ["src/index.ts"]
     }
   }
 }

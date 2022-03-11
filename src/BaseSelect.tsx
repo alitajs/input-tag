@@ -1,5 +1,6 @@
 import * as React from 'react';
 import classNames from 'classnames';
+import { Tag } from 'antd';
 import KeyCode from 'rc-util/lib/KeyCode';
 import isMobile from 'rc-util/lib/isMobile';
 import { useComposeRef } from 'rc-util/lib/ref';
@@ -16,6 +17,7 @@ import useDelayReset from './hooks/useDelayReset';
 import TransBtn from './TransBtn';
 import useLock from './hooks/useLock';
 import { BaseSelectContext } from './hooks/useBaseProps';
+import type { ValueItemProps } from './Select';
 
 const DEFAULT_OMIT_PROPS = [
   'value',
@@ -76,9 +78,9 @@ export interface BaseSelectPrivateProps {
   omitDomProps?: string[];
 
   // >>> Value
-  displayValues: DisplayValueType[];
-  onDisplayValuesChange: (
-    values: DisplayValueType[],
+  displayValues: ValueItemProps[];
+  onDisplayValuesChange?: (
+    values: ValueItemProps[],
     info: {
       type: 'add' | 'remove' | 'clear';
       values: DisplayValueType[];
@@ -201,13 +203,22 @@ export function isMultiple(mode: Mode) {
   return mode === 'tags' || mode === 'multiple';
 }
 
+const mergeTagRender = (props: CustomTagProps) => {
+  const { label, closable, onClose } = props;
+  return (
+    <Tag color="blue" closable={closable} onClose={onClose} style={{ margin: '0 3px' }}>
+      {label}
+    </Tag>
+  );
+};
+
 const BaseSelect = React.forwardRef((props: BaseSelectProps, ref: React.Ref<BaseSelectRef>) => {
   const {
     id,
     prefixCls,
     className,
     showSearch,
-    tagRender,
+    tagRender = mergeTagRender,
     direction,
     omitDomProps,
 
@@ -363,7 +374,7 @@ const BaseSelect = React.forwardRef((props: BaseSelectProps, ref: React.Ref<Base
       const nextOpen = newOpen !== undefined ? newOpen : !mergedOpen;
 
       if (mergedOpen !== nextOpen && !disabled) {
-        setInnerOpen(nextOpen);
+        setInnerOpen(false);
         onDropdownVisibleChange?.(nextOpen);
       }
     },
@@ -512,7 +523,7 @@ const BaseSelect = React.forwardRef((props: BaseSelectProps, ref: React.Ref<Base
   };
 
   // ============================ Selector ============================
-  const onSelectorRemove = (val: DisplayValueType) => {
+  const onSelectorRemove = (val: ValueItemProps) => {
     const newValues = displayValues.filter((i) => i !== val);
 
     onDisplayValuesChange(newValues, {

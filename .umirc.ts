@@ -1,19 +1,11 @@
-// more config: https://d.umijs.org/config
 import { defineConfig } from 'dumi';
 
 export default defineConfig({
-  title: 'rc-select',
+  title: '@alitajs/input-tag',
   favicon:
-    'https://avatars0.githubusercontent.com/u/9441414?s=200&v=4',
-  logo:
-    'https://avatars0.githubusercontent.com/u/9441414?s=200&v=4',
-  outputPath: '.doc',
-  exportStatic: {},
-  styles: [
-    `
-      .markdown table {
-        width: auto !important;
-      }
-    `,
-  ]
+    'https://user-images.githubusercontent.com/9554297/83762004-a0761b00-a6a9-11ea-83b4-9c8ff721d4b8.png',
+  logo: 'https://user-images.githubusercontent.com/9554297/83762004-a0761b00-a6a9-11ea-83b4-9c8ff721d4b8.png',
+  outputPath: 'docs-dist',
+  mode: 'site',
+  // more config: https://d.umijs.org/config
 });
