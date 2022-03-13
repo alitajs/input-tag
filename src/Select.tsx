@@ -111,7 +111,7 @@ export interface SelectProps<ValueType = any, OptionType extends BaseOptionType 
   onChange?: (value: ValueType, option: OptionType | OptionType[]) => void;
 }
 
-export interface ValueItemProps {
+export interface ValueItemProps extends Record<string, any> {
   disabled?: any;
   label: string;
   value: string;
