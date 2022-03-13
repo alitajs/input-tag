@@ -456,7 +456,7 @@ const Select = React.forwardRef(
             activeDescendantId={`${mergedId}_list_${accessibilityIndex}`}
           />
           {addOnAfter && (
-            <div className="ant-input-group-addon" style={{ width: 'auto', padding: '7px 11px' }}>
+            <div style={{ width: 'auto', padding: '4px 11px' }} className="ant-input-group-addon">
               {addOnAfter}
             </div>
           )}
