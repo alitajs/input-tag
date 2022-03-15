@@ -11,3 +11,12 @@ export const isClient =
 /** Is client side and not jsdom */
 // @ts-ignore
 export const isBrowserClient = process.env.NODE_ENV !== 'test' && isClient;
+
+/**
+ * 设置随机数
+ * @returns
+ */
+export const getRandom = () => {
+  const val = `${Math.random().toString(36).slice(2, 6)}`;
+  return val;
+};

@@ -1,11 +1,12 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import classNames from 'classnames';
 import pickAttrs from 'rc-util/lib/pickAttrs';
 import Overflow from '../Overflow';
 import TransBtn from '../TransBtn';
 import type { InnerSelectorProps } from '.';
 import Input from './Input';
+import SelectContext from '../SelectContext';
 import useLayoutEffect from '../hooks/useLayoutEffect';
 import type { DisplayValueType, RenderNode, CustomTagProps, RawValueType } from '../BaseSelect';
 
@@ -62,6 +63,8 @@ const SelectSelector: React.FC<SelectorProps> = (props) => {
     onInputCompositionStart,
     onInputCompositionEnd,
   } = props;
+
+  const { editable } = useContext(SelectContext);
 
   const measureRef = React.useRef<HTMLSpanElement>(null);
   const [inputWidth, setInputWidth] = useState(0);
@@ -184,7 +187,7 @@ const SelectSelector: React.FC<SelectorProps> = (props) => {
       }}
     >
       <Input
-        ref={inputRef}
+        ref={editable ? inputRef : undefined}
         open={open}
         prefixCls={prefixCls}
         id={id}
@@ -219,7 +222,7 @@ const SelectSelector: React.FC<SelectorProps> = (props) => {
       data={values}
       renderItem={renderItem}
       renderRest={renderRest}
-      suffix={inputNode}
+      suffix={editable ? inputNode : undefined}
       itemKey="key"
       maxCount={maxTagCount}
     />

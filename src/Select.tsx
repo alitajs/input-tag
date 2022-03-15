@@ -14,6 +14,7 @@ import { fillFieldNames, flattenOptions, injectPropsWithOption } from './utils/v
 import warningProps from './utils/warningPropsUtil';
 import useFilterOptions from './hooks/useFilterOptions';
 import useCache from './hooks/useCache';
+import { getRandom } from './utils/commonUtil';
 
 const OMIT_DOM_PROPS = ['inputValue'];
 
@@ -108,6 +109,7 @@ export interface SelectProps<ValueType = any, OptionType extends BaseOptionType 
   value?: ValueType | null;
   defaultValue?: ValueType | null;
   addOnAfter?: React.ReactNode;
+  editable?: boolean; // 输入框是否可编辑
   onChange?: (value: ValueType, option: OptionType | OptionType[]) => void;
 }
 
@@ -150,6 +152,7 @@ const Select = React.forwardRef(
       listHeight = 200,
       listItemHeight = 20,
       addOnAfter,
+      editable = true,
 
       // Value
       value,
@@ -366,12 +369,24 @@ const Select = React.forwardRef(
         const formatted = (searchText || '').trim();
         // prevent empty tags from appearing when you click the Enter button
         if (formatted) {
+          let lastTextFlag = false;
           const newRawValues = [...props.value];
-          newRawValues.push({
-            label: formatted,
-            value: formatted,
-            type: 'text',
-          });
+          if (newRawValues && !!newRawValues.length) {
+            const lastValue = newRawValues[newRawValues.length - 1];
+            if (lastValue && lastValue.type === 'text') lastTextFlag = true;
+          }
+          if (lastTextFlag) {
+            newRawValues.splice(newRawValues.length - 1, 1, {
+              ...newRawValues[newRawValues.length - 1],
+              label: `${newRawValues[newRawValues.length - 1]?.label}${formatted}`,
+            });
+          } else {
+            newRawValues.push({
+              label: formatted,
+              value: getRandom(),
+              type: 'text',
+            });
+          }
           triggerChange(newRawValues);
           triggerSelect(formatted, true);
           setSearchValue('');
@@ -400,6 +415,7 @@ const Select = React.forwardRef(
         listHeight,
         listItemHeight,
         childrenAsData,
+        editable,
       };
     }, [
       parsedOptions,
@@ -414,6 +430,7 @@ const Select = React.forwardRef(
       listHeight,
       listItemHeight,
       childrenAsData,
+      editable,
     ]);
 
     // ========================== Warning ===========================

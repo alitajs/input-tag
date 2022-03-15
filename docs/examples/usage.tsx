@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from 'antd';
 import type { ValueItemProps } from '@alitajs/input-tag';
 import Select from '@alitajs/input-tag';
@@ -13,11 +13,13 @@ export const getRandom = () => {
 };
 
 const Test: React.FC = () => {
-  const [value, setValue] = React.useState<ValueItemProps[]>([
+  const [value, setValue] = useState<ValueItemProps[]>([
     { label: '111', value: '111', type: 'tag', disabled: true },
     { label: '222', value: '222', type: 'text' },
     { label: '333', value: '333', type: 'tag' },
   ]);
+
+  const [editable, setEditable] = useState<boolean>(true);
 
   const addTag = () => {
     const random = getRandom();
@@ -37,8 +39,12 @@ const Test: React.FC = () => {
           setValue(val);
         }}
         onClick={() => console.log('this is click')}
+        editable={editable}
       />
+      <div style={{ height: '20px' }} />
       <Button onClick={addTag}>新增一个 tag</Button>
+      <div style={{ height: '20px' }} />
+      <Button onClick={() => setEditable(!editable)}>输入框是否可编辑</Button>
     </div>
   );
 };

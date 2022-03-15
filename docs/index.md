@@ -24,16 +24,17 @@ footer: Open-source MIT Licensed | Copyright © 2020<br />Powered by [dumi](http
 
 ## API
 
-| 参数        | 说明        | 类型                           | 默认值 | 是否必填 |
-| ----------- | ----------- | ------------------------------ | ------ | -------- |
-| value       | 值          | ValueItemProps[]               | []     | 是       |
-| onChange    | 值改变事件  | (res: ValueItemProps) => void  | -      | 是       |
-| mode        | 类型        | `tags`\|`multiple`\|`combobox` | tags   | 否       |
-| placeholder | placeholder | string                         | 请选择 | 否       |
-| style       | 样式        | React.CSSProperties            | {}     | 否       |
-| disabled    | 不可编辑    | boolean                        | false  | 否       |
-| onClick     | 点击事件    | () => void                     | -      | 否       |
-| addOnAfter  | 后缀        | string \| React.ReactNode      | -      | 否       |
+| 参数        | 说明             | 类型                           | 默认值 | 是否必填 |
+| ----------- | ---------------- | ------------------------------ | ------ | -------- |
+| value       | 值               | ValueItemProps[]               | []     | 是       |
+| onChange    | 值改变事件       | (res: ValueItemProps) => void  | -      | 是       |
+| mode        | 类型             | `tags`\|`multiple`\|`combobox` | tags   | 否       |
+| placeholder | placeholder      | string                         | 请选择 | 否       |
+| style       | 样式             | React.CSSProperties            | {}     | 否       |
+| disabled    | 不可编辑         | boolean                        | false  | 否       |
+| onClick     | 点击事件         | () => void                     | -      | 否       |
+| addOnAfter  | 后缀             | string \| React.ReactNode      | -      | 否       |
+| editable    | 输入框是否可编辑 | boolean                        | -      | 否       |
 
 ### ValueItemProps
 
