@@ -173,9 +173,7 @@ const Selector: React.RefForwardingComponent<RefSelectorProps, SelectorProps> = 
     compositionStatusRef.current = false;
 
     // Trigger search again to support `tokenSeparators` with typewriting
-    if (mode !== 'combobox') {
-      triggerOnSearch((e.target as HTMLInputElement).value);
-    }
+    triggerOnSearch((e.target as HTMLInputElement).value);
   };
 
   const onInputChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
@@ -225,7 +223,7 @@ const Selector: React.RefForwardingComponent<RefSelectorProps, SelectorProps> = 
       event.preventDefault();
     }
 
-    if ((mode !== 'combobox' && (!showSearch || !inputMouseDown)) || !open) {
+    if (!showSearch || !inputMouseDown || !open) {
       if (open) {
         onSearch('', true, false);
       }

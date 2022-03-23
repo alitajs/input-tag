@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import * as React from 'react';
 import classNames from 'classnames';
 import { Tag } from 'antd';
@@ -38,7 +39,7 @@ export type RenderNode = React.ReactNode | ((props: any) => React.ReactNode);
 
 export type RenderDOMFunc = (props: any) => HTMLElement;
 
-export type Mode = 'multiple' | 'tags' | 'combobox';
+export type Mode = 'tags';
 
 export type Placement = 'bottomLeft' | 'bottomRight' | 'topLeft' | 'topRight';
 
@@ -290,8 +291,7 @@ const BaseSelect = React.forwardRef((props: BaseSelectProps, ref: React.Ref<Base
 
   // ============================== MISC ==============================
   const multiple = isMultiple(mode);
-  const mergedShowSearch =
-    (showSearch !== undefined ? showSearch : multiple) || mode === 'combobox';
+  const mergedShowSearch = (showSearch !== undefined ? showSearch : multiple) || false;
 
   const domProps = {
     ...restProps,
@@ -331,19 +331,12 @@ const BaseSelect = React.forwardRef((props: BaseSelectProps, ref: React.Ref<Base
 
   // ========================== Search Value ==========================
   const mergedSearchValue = React.useMemo(() => {
-    if (mode !== 'combobox') {
-      return searchValue;
-    }
-
-    const val = displayValues[0]?.value;
-
-    return typeof val === 'string' || typeof val === 'number' ? String(val) : '';
-  }, [searchValue, mode, displayValues]);
+    return searchValue;
+  }, [searchValue]);
 
   // ========================== Custom Input ==========================
   // Only works in `combobox`
-  const customizeInputElement: React.ReactElement =
-    (mode === 'combobox' && typeof getInputElement === 'function' && getInputElement()) || null;
+  const customizeInputElement: React.ReactElement = null;
 
   // Used for customize replacement for `rc-cascader`
   const customizeRawInputElement: React.ReactElement =
@@ -364,7 +357,7 @@ const BaseSelect = React.forwardRef((props: BaseSelectProps, ref: React.Ref<Base
 
   // Not trigger `open` in `combobox` when `notFoundContent` is empty
   const emptyListContent = !notFoundContent && emptyOptions;
-  if (disabled || (emptyListContent && mergedOpen && mode === 'combobox')) {
+  if (disabled) {
     mergedOpen = false;
   }
   const triggerOpen = emptyListContent ? false : mergedOpen;
@@ -398,7 +391,7 @@ const BaseSelect = React.forwardRef((props: BaseSelectProps, ref: React.Ref<Base
       : getSeparatedContent(searchText, tokenSeparators);
 
     // Ignore combobox since it's not split-able
-    if (mode !== 'combobox' && patchLabels) {
+    if (patchLabels) {
       newSearchText = '';
 
       onSearchSplit?.(patchLabels);
@@ -432,7 +425,7 @@ const BaseSelect = React.forwardRef((props: BaseSelectProps, ref: React.Ref<Base
 
   // Close will clean up single mode search text
   React.useEffect(() => {
-    if (!mergedOpen && !multiple && mode !== 'combobox') {
+    if (!mergedOpen && !multiple) {
       onInternalSearch('', false, false);
     }
   }, [mergedOpen]);
@@ -465,9 +458,7 @@ const BaseSelect = React.forwardRef((props: BaseSelectProps, ref: React.Ref<Base
 
     if (which === KeyCode.ENTER) {
       // Do not submit form when type in the input
-      if (mode !== 'combobox') {
-        event.preventDefault();
-      }
+      event.preventDefault();
 
       // We only manage open state here, close logic should handle by list component
       if (!mergedOpen) {
@@ -668,8 +659,7 @@ const BaseSelect = React.forwardRef((props: BaseSelectProps, ref: React.Ref<Base
   // ==================================================================
 
   // ============================= Arrow ==============================
-  const mergedShowArrow =
-    showArrow !== undefined ? showArrow : loading || (!multiple && mode !== 'combobox');
+  const mergedShowArrow = showArrow !== undefined ? showArrow : loading || !multiple;
   let arrowNode: React.ReactNode;
 
   if (mergedShowArrow) {

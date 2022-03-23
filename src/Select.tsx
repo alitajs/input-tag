@@ -104,7 +104,7 @@ export interface SelectProps<ValueType = any, OptionType extends BaseOptionType 
   // >>> Icon
   menuItemSelectedIcon?: RenderNode;
 
-  mode?: 'combobox' | 'multiple' | 'tags';
+  mode?: 'tags';
   labelInValue?: boolean;
   value?: ValueType | null;
   defaultValue?: ValueType | null;
@@ -166,13 +166,6 @@ const Select = React.forwardRef(
     const mergedId = useId(id);
     const childrenAsData = !!(!options && children);
 
-    const mergedFilterOption = React.useMemo(() => {
-      if (filterOption === undefined && mode === 'combobox') {
-        return false;
-      }
-      return filterOption;
-    }, [filterOption, mode]);
-
     // ========================= FieldNames =========================
     const mergedFieldNames = React.useMemo(
       () => fillFieldNames(fieldNames, childrenAsData),
@@ -208,16 +201,6 @@ const Select = React.forwardRef(
       () => new Set(mergedValues.map((val) => val.value)),
       [mergedValues],
     );
-
-    React.useEffect(() => {
-      if (mode === 'combobox') {
-        const strValue = mergedValues[0]?.value;
-
-        if (strValue !== undefined && strValue !== null) {
-          setSearchValue(String(strValue));
-        }
-      }
-    }, [mergedValues]);
 
     // ======================= Display Option =======================
     // Create a placeholder item if not exist in `options`
@@ -259,7 +242,7 @@ const Select = React.forwardRef(
       filledTagOptions,
       mergedFieldNames,
       mergedSearchValue,
-      mergedFilterOption,
+      filterOption,
       optionFilterProp,
     );
 
@@ -309,18 +292,11 @@ const Select = React.forwardRef(
     const [activeValue, setActiveValue] = React.useState<string>(null);
     const [accessibilityIndex, setAccessibilityIndex] = React.useState(0);
     const mergedDefaultActiveFirstOption =
-      defaultActiveFirstOption !== undefined ? defaultActiveFirstOption : mode !== 'combobox';
+      defaultActiveFirstOption !== undefined ? defaultActiveFirstOption : true;
 
-    const onActiveValue: OnActiveValue = React.useCallback(
-      (active, index, { source = 'keyboard' } = {}) => {
-        setAccessibilityIndex(index);
-
-        if (backfill && mode === 'combobox' && active !== null && source === 'keyboard') {
-          setActiveValue(String(active));
-        }
-      },
-      [backfill, mode],
-    );
+    const onActiveValue: OnActiveValue = React.useCallback((_active, index) => {
+      setAccessibilityIndex(index);
+    }, []);
 
     // ========================= OptionList =========================
     const triggerSelect = (val: RawValueType, selected: boolean) => {
