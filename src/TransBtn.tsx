@@ -9,6 +9,7 @@ export interface TransBtnProps {
   onMouseDown?: React.MouseEventHandler<HTMLSpanElement>;
   onClick?: React.MouseEventHandler<HTMLSpanElement>;
   children?: React.ReactNode;
+  style?: React.CSSProperties;
 }
 
 const TransBtn: React.FC<TransBtnProps> = ({
@@ -18,6 +19,7 @@ const TransBtn: React.FC<TransBtnProps> = ({
   onMouseDown,
   onClick,
   children,
+  style,
 }) => {
   let icon: React.ReactNode;
 
@@ -39,6 +41,7 @@ const TransBtn: React.FC<TransBtnProps> = ({
       style={{
         userSelect: 'none',
         WebkitUserSelect: 'none',
+        ...style,
       }}
       unselectable="on"
       onClick={onClick}

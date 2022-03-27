@@ -104,7 +104,7 @@ export interface SelectProps<ValueType = any, OptionType extends BaseOptionType 
   // >>> Icon
   menuItemSelectedIcon?: RenderNode;
 
-  mode?: 'tags';
+  mode?: 'tags' | 'date';
   labelInValue?: boolean;
   value?: ValueType | null;
   defaultValue?: ValueType | null;
@@ -335,6 +335,17 @@ const Select = React.forwardRef(
       }
     };
 
+    const onDatePicker = (dat: any) => {
+      const newRawValues = [];
+      newRawValues.push({
+        label: dat.format(),
+        value: getRandom(),
+        dateValue: dat.format(),
+        type: 'date',
+      });
+      triggerChange(newRawValues);
+    };
+
     // =========================== Search ===========================
     const onInternalSearch: BaseSelectProps['onSearch'] = (searchText, info) => {
       setSearchValue(searchText);
@@ -440,6 +451,7 @@ const Select = React.forwardRef(
             // >>> Search
             searchValue={mergedSearchValue}
             onSearch={onInternalSearch}
+            onDatePicker={onDatePicker}
             dropdownMatchSelectWidth={dropdownMatchSelectWidth}
             // >>> OptionList
             OptionList={OptionList}

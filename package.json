@@ -36,10 +36,12 @@
     "hang1017 <437132124@qq.com> (https://github.com/hang1017)"
   ],
   "dependencies": {
+    "@ant-design/icons": "^4.7.0",
     "@babel/runtime": "^7.10.1",
     "@types/node": "^17.0.21",
     "antd": "^4.19.1",
     "classnames": "2.x",
+    "moment": "^2.29.1",
     "rc-motion": "^2.0.1",
     "rc-overflow": "^1.0.0",
     "rc-trigger": "^5.0.4",
