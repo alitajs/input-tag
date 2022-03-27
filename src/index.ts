@@ -8,6 +8,7 @@ import useBaseProps from './hooks/useBaseProps';
 
 import 'antd/lib/select/style/index.less';
 import 'antd/lib/button/style/index.less';
+import 'antd/lib/date-picker/style/index.less';
 import 'antd/lib/tag/style/index.less';
 import 'antd/lib/input/style/index.less';
 import 'antd/lib/icon/style/index.less';

@@ -123,14 +123,14 @@ const SelectTrigger: React.RefForwardingComponent<RefTriggerProps, SelectTrigger
   }));
 
   const popupStyle: React.CSSProperties = {
-    minWidth: containerWidth,
+    // minWidth: containerWidth,
     ...dropdownStyle,
   };
 
   if (typeof dropdownMatchSelectWidth === 'number') {
-    popupStyle.width = dropdownMatchSelectWidth;
+    // popupStyle.width = dropdownMatchSelectWidth;
   } else if (dropdownMatchSelectWidth) {
-    popupStyle.width = containerWidth;
+    // popupStyle.width = containerWidth;
   }
 
   return (

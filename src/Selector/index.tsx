@@ -109,7 +109,6 @@ const Selector: React.RefForwardingComponent<RefSelectorProps, SelectorProps> = 
     onSearchSubmit,
     onToggleOpen,
     onInputKeyDown,
-
     domRef,
   } = props;
 
@@ -248,6 +247,7 @@ const Selector: React.RefForwardingComponent<RefSelectorProps, SelectorProps> = 
     <div
       ref={domRef}
       className={`${prefixCls}-selector`}
+      style={{ width: 'auto' }}
       onClick={onClick}
       onMouseDown={onMouseDown}
     >

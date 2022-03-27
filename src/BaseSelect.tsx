@@ -2,12 +2,14 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import { Tag } from 'antd';
+import moment from 'moment';
 import KeyCode from 'rc-util/lib/KeyCode';
 import isMobile from 'rc-util/lib/isMobile';
 import { useComposeRef } from 'rc-util/lib/ref';
 import type { ScrollTo } from 'rc-virtual-list/lib/List';
 import useMergedState from 'rc-util/lib/hooks/useMergedState';
 import useLayoutEffect from 'rc-util/lib/hooks/useLayoutEffect';
+import momentGenerateConfig from 'rc-picker/lib/generate/moment';
 import { getSeparatedContent } from './utils/valueUtil';
 import type { RefTriggerProps } from './SelectTrigger';
 import SelectTrigger from './SelectTrigger';
@@ -18,7 +20,11 @@ import useDelayReset from './hooks/useDelayReset';
 import TransBtn from './TransBtn';
 import useLock from './hooks/useLock';
 import { BaseSelectContext } from './hooks/useBaseProps';
+import PickerPanel from './Date/PickerPanel';
 import type { ValueItemProps } from './Select';
+import { dateLocale } from './Date/utils/localeUtil';
+import CloseCircleFilled from '@ant-design/icons/CloseCircleFilled';
+import CalendarOutlined from '@ant-design/icons/CalendarOutlined';
 
 const DEFAULT_OMIT_PROPS = [
   'value',
@@ -39,7 +45,7 @@ export type RenderNode = React.ReactNode | ((props: any) => React.ReactNode);
 
 export type RenderDOMFunc = (props: any) => HTMLElement;
 
-export type Mode = 'tags';
+export type Mode = 'tags' | 'date';
 
 export type Placement = 'bottomLeft' | 'bottomRight' | 'topLeft' | 'topRight';
 
@@ -97,6 +103,7 @@ export interface BaseSelectPrivateProps {
 
   // >>> Search
   searchValue: string;
+  onDatePicker: (date: any) => void;
   /** Trigger onSearch, return false to prevent trigger open event */
   onSearch: (
     searchValue: string,
@@ -108,6 +115,7 @@ export interface BaseSelectPrivateProps {
         | 'blur'; // Not trigger event
     },
   ) => void;
+
   /** Trigger when search text match the `tokenSeparators`. Will provide split content */
   onSearchSplit?: (words: string[]) => void;
   maxLength?: number;
@@ -201,7 +209,7 @@ export interface BaseSelectProps extends BaseSelectPrivateProps, React.AriaAttri
 }
 
 export function isMultiple(mode: Mode) {
-  return mode === 'tags' || mode === 'multiple';
+  return mode === 'tags';
 }
 
 const mergeTagRender = (props: CustomTagProps) => {
@@ -279,15 +287,19 @@ const BaseSelect = React.forwardRef((props: BaseSelectProps, ref: React.Ref<Base
     showAction = [],
     onFocus,
     onBlur,
+    onClick,
 
     // Rest Events
     onKeyUp,
     onKeyDown,
     onMouseDown,
-
+    onDatePicker,
     // Rest Props
     ...restProps
   } = props;
+
+  // Selected value
+  const [selectedValue, setSelectedValue] = React.useState<any>(moment(new Date()));
 
   // ============================== MISC ==============================
   const multiple = isMultiple(mode);
@@ -362,12 +374,15 @@ const BaseSelect = React.forwardRef((props: BaseSelectProps, ref: React.Ref<Base
   }
   const triggerOpen = emptyListContent ? false : mergedOpen;
 
+  /**
+   * 这里就是处理下拉开关的地方
+   */
   const onToggleOpen = React.useCallback(
     (newOpen?: boolean) => {
       const nextOpen = newOpen !== undefined ? newOpen : !mergedOpen;
 
       if (mergedOpen !== nextOpen && !disabled) {
-        setInnerOpen(false);
+        if (mode === 'date') setInnerOpen(nextOpen);
         onDropdownVisibleChange?.(nextOpen);
       }
     },
@@ -558,11 +573,6 @@ const BaseSelect = React.forwardRef((props: BaseSelectProps, ref: React.Ref<Base
       // `tags` mode should move `searchValue` into values
       if (mode === 'tags') {
         onSearch(mergedSearchValue, { source: 'submit' });
-      } else if (mode === 'multiple') {
-        // `multiple` mode only clean the search value but not trigger event
-        onSearch('', {
-          source: 'blur',
-        });
       }
     }
 
@@ -698,14 +708,46 @@ const BaseSelect = React.forwardRef((props: BaseSelectProps, ref: React.Ref<Base
         className={`${prefixCls}-clear`}
         onMouseDown={onClearMouseDown}
         customizeIcon={clearIcon}
+        style={{ opacity: 1 }}
       >
-        ×
+        <CloseCircleFilled />
+      </TransBtn>
+    );
+  } else if (mode === 'date') {
+    clearNode = (
+      <TransBtn className={`${prefixCls}-clear`} style={{ opacity: 1 }} customizeIcon={clearIcon}>
+        <CalendarOutlined />
       </TransBtn>
     );
   }
 
-  // =========================== OptionList ===========================
-  const optionList = <OptionList ref={listRef} />;
+  // // =========================== OptionList ===========================
+  // const optionList = <OptionList ref={listRef} />;
+
+  const panelNode: React.ReactNode = (
+    <PickerPanel<any>
+      // {...panelProps}
+      generateConfig={momentGenerateConfig}
+      // className={classNames({
+      //   [`${prefixCls}-panel-focused`]: !typing,
+      // })}
+      value={selectedValue}
+      locale={dateLocale}
+      tabIndex={-1}
+      onSelect={(date) => {
+        setSelectedValue(date);
+        onToggleOpen(false);
+        setInnerOpen(false);
+        onDatePicker(date);
+      }}
+      direction={direction}
+      // onPanelChange={(viewDate, mode) => {
+      //   const { onPanelChange } = props;
+      //   onLeave(true);
+      //   onPanelChange?.(viewDate, mode);
+      // }}
+    />
+  );
 
   // ============================= Select =============================
   const mergedClassName = classNames(prefixCls, className, {
@@ -728,7 +770,8 @@ const BaseSelect = React.forwardRef((props: BaseSelectProps, ref: React.Ref<Base
       disabled={disabled}
       prefixCls={prefixCls}
       visible={triggerOpen}
-      popupElement={optionList}
+      // @ts-ignore
+      popupElement={panelNode}
       containerWidth={containerWidth}
       animation={animation}
       transitionName={transitionName}
@@ -792,6 +835,11 @@ const BaseSelect = React.forwardRef((props: BaseSelectProps, ref: React.Ref<Base
         onKeyUp={onInternalKeyUp}
         onFocus={onContainerFocus}
         onBlur={onContainerBlur}
+        onClick={(e: any) => {
+          if (onClick && !disabled) {
+            onClick(e);
+          }
+        }}
       >
         {mockFocused && !mergedOpen && (
           <span

@@ -295,10 +295,13 @@ function Overflow<ItemType = any>(props: OverflowProps<ItemType>, ref: React.Ref
         const { type = '', label = '' } = item;
         const key = getKey(item, index);
 
-        if (type === 'text') {
-          return <span key={key}>{label}</span>;
+        if (['date', 'text'].indexOf(type) !== -1) {
+          return (
+            <span key={key} style={{ wordBreak: 'break-all' }}>
+              {label}
+            </span>
+          );
         }
-
         return (
           <Tag
             {...itemSharedProps}
@@ -351,9 +354,10 @@ function Overflow<ItemType = any>(props: OverflowProps<ItemType>, ref: React.Ref
     <Component
       className={classNames(!invalidate && prefixCls, className)}
       style={{
-        ...style,
         display: 'flex',
         alignItems: 'center',
+        flex: 'inherit',
+        ...style,
       }}
       ref={ref}
       {...restProps}

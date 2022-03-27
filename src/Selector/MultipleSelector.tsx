@@ -141,7 +141,7 @@ const SelectSelector: React.FC<SelectorProps> = (props) => {
 
   function renderItem(valueItem: DisplayValueType) {
     const { disabled: itemDisabled, label, value } = valueItem;
-    const closable = !disabled && !itemDisabled;
+    const closable = !disabled && !itemDisabled && editable;
 
     let displayLabel: React.ReactNode = label;
 
