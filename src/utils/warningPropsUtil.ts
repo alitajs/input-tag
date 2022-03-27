@@ -26,7 +26,7 @@ function warningProps(props: SelectProps) {
   } = props;
 
   const multiple = isMultiple(mode);
-  const mergedShowSearch = showSearch !== undefined ? showSearch : multiple || mode === 'combobox';
+  const mergedShowSearch = showSearch !== undefined ? showSearch : multiple;
   const mergedOptions = options || convertChildrenToData(children);
 
   // `tags` should not set option as disabled
@@ -36,7 +36,7 @@ function warningProps(props: SelectProps) {
   );
 
   // `combobox` & `tags` should option be `string` type
-  if (mode === 'tags' || mode === 'combobox') {
+  if (mode === 'tags') {
     const hasNumberValue = mergedOptions.some((item) => {
       if (item.options) {
         return item.options.some(
@@ -54,27 +54,24 @@ function warningProps(props: SelectProps) {
 
   // `combobox` should not use `optionLabelProp`
   warning(
-    mode !== 'combobox' || !optionLabelProp,
+    !optionLabelProp,
     '`combobox` mode not support `optionLabelProp`. Please set `value` on Option directly.',
   );
 
   // Only `combobox` support `backfill`
-  warning(mode === 'combobox' || !backfill, '`backfill` only works with `combobox` mode.');
+  warning(!backfill, '`backfill` only works with `combobox` mode.');
 
   // Only `combobox` support `getInputElement`
-  warning(
-    mode === 'combobox' || !getInputElement,
-    '`getInputElement` only work with `combobox` mode.',
-  );
+  warning(!getInputElement, '`getInputElement` only work with `combobox` mode.');
 
   // Customize `getInputElement` should not use `allowClear` & `placeholder`
   noteOnce(
-    mode !== 'combobox' || !getInputElement || !allowClear || !placeholder,
+    !getInputElement || !allowClear || !placeholder,
     'Customize `getInputElement` should customize clear and placeholder logic instead of configuring `allowClear` and `placeholder`.',
   );
 
   // `onSearch` should use in `combobox` or `showSearch`
-  if (onSearch && !mergedShowSearch && mode !== 'combobox' && mode !== 'tags') {
+  if (onSearch && !mergedShowSearch && mode !== 'tags') {
     warning(false, '`onSearch` should work with `showSearch` instead of use alone.');
   }
 

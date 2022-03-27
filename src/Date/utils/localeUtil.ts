@@ -25,4 +25,6 @@ export const dateLocale = {
   year: '年',
   yearFormat: 'YYYY年',
   yearSelect: '选择年份',
+  monthFormat: 'MMMM',
+  monthBeforeYear: true,
 };

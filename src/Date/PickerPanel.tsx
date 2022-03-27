@@ -156,6 +156,7 @@ function PickerPanel<DateType>(props: PickerPanelProps<DateType>) {
   const isMinuteStepValid = 60 % minuteStep === 0;
   const isSecondStepValid = 60 % secondStep === 0;
 
+  // @ts-ignore
   if (process.env.NODE_ENV !== 'production') {
     warning(!value || generateConfig.isValidate(value), 'Invalidate date pass to `value`.');
     warning(!value || generateConfig.isValidate(value), 'Invalidate date pass to `defaultValue`.');

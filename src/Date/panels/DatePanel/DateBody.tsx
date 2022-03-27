@@ -55,11 +55,9 @@ function DateBody<DateType>(props: DateBodyProps<DateType>) {
 
   // ============================== Header ==============================
   const headerCells: React.ReactNode[] = [];
-  const weekDaysLocale: string[] =
-    locale.shortWeekDays ||
-    (generateConfig.locale.getShortWeekDays
-      ? generateConfig.locale.getShortWeekDays(locale.locale)
-      : []);
+  const weekDaysLocale: string[] = generateConfig.locale.getShortWeekDays
+    ? generateConfig.locale.getShortWeekDays(locale.locale)
+    : [];
 
   if (prefixColumn) {
     headerCells.push(<th key="empty" aria-label="empty cell" />);

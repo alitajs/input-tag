@@ -42,11 +42,9 @@ function DateHeader<DateType>(props: DateHeaderProps<DateType>) {
 
   const headerPrefixCls = `${prefixCls}-header`;
 
-  const monthsLocale: string[] =
-    locale.shortMonths ||
-    (generateConfig.locale.getShortMonths
-      ? generateConfig.locale.getShortMonths(locale.locale)
-      : []);
+  const monthsLocale: string[] = generateConfig.locale.getShortMonths
+    ? generateConfig.locale.getShortMonths(locale.locale)
+    : [];
 
   const month = generateConfig.getMonth(viewDate);
 
