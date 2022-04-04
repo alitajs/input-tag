@@ -311,7 +311,7 @@ function Overflow<ItemType = any>(props: OverflowProps<ItemType>, ref: React.Ref
             renderItem={mergedRenderItem}
             itemKey={key}
             registerSize={registerSize}
-            display={index <= mergedDisplayCount}
+            display
           />
         );
       };
