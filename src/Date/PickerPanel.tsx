@@ -68,7 +68,7 @@ export type PickerPanelSharedProps<DateType> = {
   renderExtraFooter?: (mode: PanelMode) => React.ReactNode;
 
   // Event
-  onSelect?: (value: DateType) => void;
+  onSelect?: (value: DateType, forceTriggerSelect: boolean) => void;
   onChange?: (value: DateType) => void;
   onPanelChange?: OnPanelChange<DateType>;
   onMouseDown?: React.MouseEventHandler<HTMLDivElement>;
@@ -280,7 +280,7 @@ function PickerPanel<DateType>(props: PickerPanelProps<DateType>) {
       setInnerValue(date);
 
       if (onSelect) {
-        onSelect(date);
+        onSelect(date, forceTriggerSelect);
       }
 
       if (onContextSelect) {
@@ -503,6 +503,7 @@ function PickerPanel<DateType>(props: PickerPanelProps<DateType>) {
       onNow: needConfirmButton && onNow,
       onOk: () => {
         if (mergedValue) {
+          console.log(mergedValue);
           triggerSelect(mergedValue, 'submit', true);
           if (onOk) {
             onOk(mergedValue);

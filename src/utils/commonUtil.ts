@@ -1,3 +1,5 @@
+import type { DatePickerProps } from '../interface';
+
 export function toArray<T>(value: T | T[]): T[] {
   if (Array.isArray(value)) {
     return value;
@@ -19,4 +21,28 @@ export const isBrowserClient = process.env.NODE_ENV !== 'test' && isClient;
 export const getRandom = () => {
   const val = `${Math.random().toString(36).slice(2, 6)}`;
   return val;
+};
+
+export const defaultFormat = (datePicker: DatePickerProps, showTime: boolean) => {
+  let format = '';
+  switch (datePicker) {
+    case 'date':
+      format = 'YYYY-MM-DD';
+      if (showTime) format = 'YYYY-MM-DD HH:mm';
+      break;
+    case 'week':
+      format = 'YYYY-MM-DD';
+      break;
+    case 'month':
+      format = 'YYYY-MM';
+      break;
+    case 'quarter':
+      format = 'YYYY-MM-DD';
+      break;
+    case 'year':
+      format = 'YYYY';
+      break;
+  }
+
+  return format;
 };

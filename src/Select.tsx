@@ -14,7 +14,9 @@ import { fillFieldNames, flattenOptions, injectPropsWithOption } from './utils/v
 import warningProps from './utils/warningPropsUtil';
 import useFilterOptions from './hooks/useFilterOptions';
 import useCache from './hooks/useCache';
-import { getRandom } from './utils/commonUtil';
+import { getRandom, defaultFormat } from './utils/commonUtil';
+import moment from 'moment';
+import type { IDatePickerProps, DateModeProps, DatePickerProps } from './interface';
 
 const OMIT_DOM_PROPS = ['inputValue'];
 
@@ -111,17 +113,23 @@ export interface SelectProps<ValueType = any, OptionType extends BaseOptionType 
   addOnAfter?: React.ReactNode;
   editable?: boolean; // 输入框是否可编辑
   onChange?: (value: ValueType, option: OptionType | OptionType[]) => void;
+  format?: string;
+  dateMode?: DateModeProps;
+  datePicker?: DatePickerProps;
 }
 
 export interface ValueItemProps extends Record<string, any> {
   disabled?: any;
   label: string;
   value: string;
-  type: 'text' | 'tag';
+  type: 'text' | 'tag' | 'date';
 }
 
 const Select = React.forwardRef(
-  (props: SelectProps<any, DefaultOptionType>, ref: React.Ref<BaseSelectRef>) => {
+  (
+    props: SelectProps<any, DefaultOptionType> & IDatePickerProps,
+    ref: React.Ref<BaseSelectRef>,
+  ) => {
     const {
       id,
       mode = 'tags',
@@ -159,7 +167,9 @@ const Select = React.forwardRef(
       defaultValue,
       labelInValue,
       onChange,
-
+      datePicker = 'date',
+      showTime = false,
+      format = defaultFormat(datePicker, showTime),
       ...restProps
     } = props;
 
@@ -338,9 +348,8 @@ const Select = React.forwardRef(
     const onDatePicker = (dat: any) => {
       const newRawValues = [];
       newRawValues.push({
-        label: dat.format(),
+        label: moment(dat).format(format),
         value: getRandom(),
-        dateValue: dat.format(),
         type: 'date',
       });
       triggerChange(newRawValues);
@@ -439,6 +448,9 @@ const Select = React.forwardRef(
         >
           <BaseSelect
             {...restProps}
+            // >>> Date
+            showTime={showTime}
+            datePicker={datePicker}
             // >>> MISC
             id={mergedId}
             prefixCls={prefixCls}
@@ -480,7 +492,7 @@ const TypedSelect = Select as unknown as (<
   ValueType = any,
   OptionType extends BaseOptionType | DefaultOptionType = DefaultOptionType,
 >(
-  props: React.PropsWithChildren<SelectProps<ValueType, OptionType>> & {
+  props: React.PropsWithChildren<SelectProps<ValueType, OptionType> | IDatePickerProps> & {
     ref?: React.Ref<BaseSelectRef>;
   },
 ) => React.ReactElement) & {

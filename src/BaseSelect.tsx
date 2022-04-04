@@ -2,6 +2,7 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import { Tag } from 'antd';
+import type { Moment } from 'moment';
 import moment from 'moment';
 import KeyCode from 'rc-util/lib/KeyCode';
 import isMobile from 'rc-util/lib/isMobile';
@@ -25,6 +26,7 @@ import type { ValueItemProps } from './Select';
 import { dateLocale } from './Date/utils/localeUtil';
 import CloseCircleFilled from '@ant-design/icons/CloseCircleFilled';
 import CalendarOutlined from '@ant-design/icons/CalendarOutlined';
+import type { IDatePickerProps } from './interface';
 
 const DEFAULT_OMIT_PROPS = [
   'value',
@@ -148,6 +150,8 @@ export interface BaseSelectProps extends BaseSelectPrivateProps, React.AriaAttri
 
   // >>> Mode
   mode?: Mode;
+  datePicker?: 'date' | 'week' | 'month' | 'quarter' | 'year';
+  dateMode?: 'time' | 'date' | 'month' | 'year' | 'decade';
 
   // >>> Status
   disabled?: boolean;
@@ -221,657 +225,679 @@ const mergeTagRender = (props: CustomTagProps) => {
   );
 };
 
-const BaseSelect = React.forwardRef((props: BaseSelectProps, ref: React.Ref<BaseSelectRef>) => {
-  const {
-    id,
-    prefixCls,
-    className,
-    showSearch,
-    tagRender = mergeTagRender,
-    direction,
-    omitDomProps,
+const BaseSelect = React.forwardRef(
+  (props: IDatePickerProps & BaseSelectProps, ref: React.Ref<BaseSelectRef>) => {
+    const {
+      id,
+      prefixCls,
+      className,
+      showSearch,
+      tagRender = mergeTagRender,
+      direction,
+      omitDomProps,
 
-    // Value
-    displayValues,
-    onDisplayValuesChange,
-    emptyOptions,
-    notFoundContent = 'Not Found',
-    onClear,
+      // Value
+      displayValues,
+      onDisplayValuesChange,
+      emptyOptions,
+      notFoundContent = 'Not Found',
+      onClear,
 
-    // Mode
-    mode,
+      // Mode
+      mode,
+      datePicker = 'date',
+      dateMode,
 
-    // Status
-    disabled,
-    loading,
+      // Status
+      disabled,
+      loading,
 
-    // Customize Input
-    getInputElement,
-    getRawInputElement,
+      // Customize Input
+      getInputElement,
+      getRawInputElement,
 
-    // Open
-    open,
-    defaultOpen,
-    onDropdownVisibleChange,
+      // Open
+      open,
+      defaultOpen,
+      onDropdownVisibleChange,
 
-    // Active
-    activeValue,
-    onActiveValueChange,
-    activeDescendantId,
+      // Active
+      activeValue,
+      onActiveValueChange,
+      activeDescendantId,
 
-    // Search
-    searchValue,
-    onSearch,
-    onSearchSplit,
-    tokenSeparators,
+      // Search
+      searchValue,
+      onSearch,
+      onSearchSplit,
+      tokenSeparators,
 
-    // Icons
-    allowClear,
-    showArrow,
-    inputIcon,
-    clearIcon,
+      // Icons
+      allowClear,
+      showArrow,
+      inputIcon,
+      clearIcon,
 
-    // Dropdown
-    OptionList,
-    animation,
-    transitionName,
-    dropdownStyle,
-    dropdownClassName,
-    dropdownMatchSelectWidth,
-    dropdownRender,
-    dropdownAlign,
-    placement,
-    getPopupContainer,
+      // Dropdown
+      OptionList,
+      animation,
+      transitionName,
+      dropdownStyle,
+      dropdownClassName,
+      dropdownMatchSelectWidth,
+      dropdownRender,
+      dropdownAlign,
+      placement,
+      getPopupContainer,
 
-    // Focus
-    showAction = [],
-    onFocus,
-    onBlur,
-    onClick,
+      // Focus
+      showAction = [],
+      onFocus,
+      onBlur,
+      onClick,
 
-    // Rest Events
-    onKeyUp,
-    onKeyDown,
-    onMouseDown,
-    onDatePicker,
-    // Rest Props
-    ...restProps
-  } = props;
+      // Rest Events
+      onKeyUp,
+      onKeyDown,
+      onMouseDown,
+      onDatePicker,
 
-  // Selected value
-  const [selectedValue, setSelectedValue] = React.useState<any>(moment(new Date()));
+      showTime,
 
-  // ============================== MISC ==============================
-  const multiple = isMultiple(mode);
-  const mergedShowSearch = (showSearch !== undefined ? showSearch : multiple) || false;
+      // Rest Props
+      ...restProps
+    } = props;
 
-  const domProps = {
-    ...restProps,
-  } as Omit<keyof typeof restProps, typeof DEFAULT_OMIT_PROPS[number]>;
+    // Selected value
+    const [selectedValue, setSelectedValue] = React.useState<any>(moment(new Date()));
 
-  DEFAULT_OMIT_PROPS.forEach((propName) => {
-    delete domProps[propName];
-  });
+    // ============================== MISC ==============================
+    const multiple = isMultiple(mode);
+    const mergedShowSearch = (showSearch !== undefined ? showSearch : multiple) || false;
 
-  omitDomProps?.forEach((propName) => {
-    delete domProps[propName];
-  });
+    const domProps = {
+      ...restProps,
+    } as unknown as Omit<keyof typeof restProps, typeof DEFAULT_OMIT_PROPS[number]>;
 
-  // ============================= Mobile =============================
-  const [mobile, setMobile] = React.useState(false);
-  React.useEffect(() => {
-    // Only update on the client side
-    setMobile(isMobile());
-  }, []);
+    DEFAULT_OMIT_PROPS.forEach((propName) => {
+      delete domProps[propName];
+    });
 
-  // ============================== Refs ==============================
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const selectorDomRef = React.useRef<HTMLDivElement>(null);
-  const triggerRef = React.useRef<RefTriggerProps>(null);
-  const selectorRef = React.useRef<RefSelectorProps>(null);
-  const listRef = React.useRef<RefOptionListProps>(null);
+    omitDomProps?.forEach((propName) => {
+      delete domProps[propName];
+    });
 
-  /** Used for component focused management */
-  const [mockFocused, setMockFocused, cancelSetMockFocused] = useDelayReset();
+    // ============================= Mobile =============================
+    const [mobile, setMobile] = React.useState(false);
+    React.useEffect(() => {
+      // Only update on the client side
+      setMobile(isMobile());
+    }, []);
 
-  // =========================== Imperative ===========================
-  React.useImperativeHandle(ref, () => ({
-    focus: selectorRef.current?.focus,
-    blur: selectorRef.current?.blur,
-    scrollTo: (arg) => listRef.current?.scrollTo(arg as any),
-  }));
+    // ============================== Refs ==============================
+    const containerRef = React.useRef<HTMLDivElement>(null);
+    const selectorDomRef = React.useRef<HTMLDivElement>(null);
+    const triggerRef = React.useRef<RefTriggerProps>(null);
+    const selectorRef = React.useRef<RefSelectorProps>(null);
+    const listRef = React.useRef<RefOptionListProps>(null);
 
-  // ========================== Search Value ==========================
-  const mergedSearchValue = React.useMemo(() => {
-    return searchValue;
-  }, [searchValue]);
+    /** Used for component focused management */
+    const [mockFocused, setMockFocused, cancelSetMockFocused] = useDelayReset();
 
-  // ========================== Custom Input ==========================
-  // Only works in `combobox`
-  const customizeInputElement: React.ReactElement = null;
+    // =========================== Imperative ===========================
+    React.useImperativeHandle(ref, () => ({
+      focus: selectorRef.current?.focus,
+      blur: selectorRef.current?.blur,
+      scrollTo: (arg) => listRef.current?.scrollTo(arg as any),
+    }));
 
-  // Used for customize replacement for `rc-cascader`
-  const customizeRawInputElement: React.ReactElement =
-    typeof getRawInputElement === 'function' && getRawInputElement();
+    // ========================== Search Value ==========================
+    const mergedSearchValue = React.useMemo(() => {
+      return searchValue;
+    }, [searchValue]);
 
-  const customizeRawInputRef = useComposeRef<HTMLElement>(
-    selectorDomRef,
-    customizeRawInputElement?.props?.ref,
-  );
+    // ========================== Custom Input ==========================
+    // Only works in `combobox`
+    const customizeInputElement: React.ReactElement = null;
 
-  // ============================== Open ==============================
-  const [innerOpen, setInnerOpen] = useMergedState<boolean>(undefined, {
-    defaultValue: defaultOpen,
-    value: open,
-  });
+    // Used for customize replacement for `rc-cascader`
+    const customizeRawInputElement: React.ReactElement =
+      typeof getRawInputElement === 'function' && getRawInputElement();
 
-  let mergedOpen = innerOpen;
+    const customizeRawInputRef = useComposeRef<HTMLElement>(
+      selectorDomRef,
+      customizeRawInputElement?.props?.ref,
+    );
 
-  // Not trigger `open` in `combobox` when `notFoundContent` is empty
-  const emptyListContent = !notFoundContent && emptyOptions;
-  if (disabled) {
-    mergedOpen = false;
-  }
-  const triggerOpen = emptyListContent ? false : mergedOpen;
+    // ============================== Open ==============================
+    const [innerOpen, setInnerOpen] = useMergedState<boolean>(undefined, {
+      defaultValue: defaultOpen,
+      value: open,
+    });
 
-  /**
-   * 这里就是处理下拉开关的地方
-   */
-  const onToggleOpen = React.useCallback(
-    (newOpen?: boolean) => {
-      const nextOpen = newOpen !== undefined ? newOpen : !mergedOpen;
+    let mergedOpen = innerOpen;
 
-      if (mergedOpen !== nextOpen && !disabled) {
-        if (mode === 'date') setInnerOpen(nextOpen);
-        onDropdownVisibleChange?.(nextOpen);
-      }
-    },
-    [disabled, mergedOpen, setInnerOpen, onDropdownVisibleChange],
-  );
-
-  // ============================= Search =============================
-  const tokenWithEnter = React.useMemo(
-    () => (tokenSeparators || []).some((tokenSeparator) => ['\n', '\r\n'].includes(tokenSeparator)),
-    [tokenSeparators],
-  );
-
-  const onInternalSearch = (searchText: string, fromTyping: boolean, isCompositing: boolean) => {
-    let ret = true;
-    let newSearchText = searchText;
-    onActiveValueChange?.(null);
-
-    // Check if match the `tokenSeparators`
-    const patchLabels: string[] = isCompositing
-      ? null
-      : getSeparatedContent(searchText, tokenSeparators);
-
-    // Ignore combobox since it's not split-able
-    if (patchLabels) {
-      newSearchText = '';
-
-      onSearchSplit?.(patchLabels);
-
-      // Should close when paste finish
-      onToggleOpen(false);
-
-      // Tell Selector that break next actions
-      ret = false;
-    }
-
-    if (onSearch && mergedSearchValue !== newSearchText) {
-      onSearch(newSearchText, {
-        source: fromTyping ? 'typing' : 'effect',
-      });
-    }
-
-    return ret;
-  };
-
-  // Only triggered when menu is closed & mode is tags
-  // If menu is open, OptionList will take charge
-  // If mode isn't tags, press enter is not meaningful when you can't see any option
-  const onInternalSearchSubmit = (searchText: string) => {
-    // prevent empty tags from appearing when you click the Enter button
-    if (!searchText || !searchText.trim()) {
-      return;
-    }
-    onSearch(searchText, { source: 'submit' });
-  };
-
-  // Close will clean up single mode search text
-  React.useEffect(() => {
-    if (!mergedOpen && !multiple) {
-      onInternalSearch('', false, false);
-    }
-  }, [mergedOpen]);
-
-  // ============================ Disabled ============================
-  // Close dropdown & remove focus state when disabled change
-  React.useEffect(() => {
-    if (innerOpen && disabled) {
-      setInnerOpen(false);
-    }
-
+    // Not trigger `open` in `combobox` when `notFoundContent` is empty
+    const emptyListContent = !notFoundContent && emptyOptions;
     if (disabled) {
-      setMockFocused(false);
+      mergedOpen = false;
     }
-  }, [disabled]);
+    const triggerOpen = emptyListContent ? false : mergedOpen;
 
-  // ============================ Keyboard ============================
-  /**
-   * We record input value here to check if can press to clean up by backspace
-   * - null: Key is not down, this is reset by key up
-   * - true: Search text is empty when first time backspace down
-   * - false: Search text is not empty when first time backspace down
-   */
-  const [getClearLock, setClearLock] = useLock();
+    /**
+     * 这里就是处理下拉开关的地方
+     */
+    const onToggleOpen = React.useCallback(
+      (newOpen?: boolean) => {
+        const nextOpen = newOpen !== undefined ? newOpen : !mergedOpen;
 
-  // KeyDown
-  const onInternalKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (event, ...rest) => {
-    const clearLock = getClearLock();
-    const { which } = event;
-
-    if (which === KeyCode.ENTER) {
-      // Do not submit form when type in the input
-      event.preventDefault();
-
-      // We only manage open state here, close logic should handle by list component
-      if (!mergedOpen) {
-        onToggleOpen(true);
-      }
-    }
-
-    setClearLock(!!mergedSearchValue);
-
-    // Remove value by `backspace`
-    if (
-      which === KeyCode.BACKSPACE &&
-      !clearLock &&
-      multiple &&
-      !mergedSearchValue &&
-      displayValues.length
-    ) {
-      const cloneDisplayValues = [...displayValues];
-      let removedDisplayValue = null;
-
-      for (let i = cloneDisplayValues.length - 1; i >= 0; i -= 1) {
-        const current = cloneDisplayValues[i];
-
-        if (!current.disabled) {
-          cloneDisplayValues.splice(i, 1);
-          removedDisplayValue = current;
-          break;
+        if (mergedOpen !== nextOpen && !disabled) {
+          if (mode === 'date') setInnerOpen(nextOpen);
+          onDropdownVisibleChange?.(nextOpen);
         }
+      },
+      [disabled, mergedOpen, setInnerOpen, onDropdownVisibleChange],
+    );
+
+    // ============================= Search =============================
+    const tokenWithEnter = React.useMemo(
+      () =>
+        (tokenSeparators || []).some((tokenSeparator) => ['\n', '\r\n'].includes(tokenSeparator)),
+      [tokenSeparators],
+    );
+
+    const onInternalSearch = (searchText: string, fromTyping: boolean, isCompositing: boolean) => {
+      let ret = true;
+      let newSearchText = searchText;
+      onActiveValueChange?.(null);
+
+      // Check if match the `tokenSeparators`
+      const patchLabels: string[] = isCompositing
+        ? null
+        : getSeparatedContent(searchText, tokenSeparators);
+
+      // Ignore combobox since it's not split-able
+      if (patchLabels) {
+        newSearchText = '';
+
+        onSearchSplit?.(patchLabels);
+
+        // Should close when paste finish
+        onToggleOpen(false);
+
+        // Tell Selector that break next actions
+        ret = false;
       }
 
-      if (removedDisplayValue) {
-        onDisplayValuesChange(cloneDisplayValues, {
-          type: 'remove',
-          values: [removedDisplayValue],
+      if (onSearch && mergedSearchValue !== newSearchText) {
+        onSearch(newSearchText, {
+          source: fromTyping ? 'typing' : 'effect',
         });
       }
-    }
 
-    if (mergedOpen && listRef.current) {
-      listRef.current.onKeyDown(event, ...rest);
-    }
+      return ret;
+    };
 
-    onKeyDown?.(event, ...rest);
-  };
+    // Only triggered when menu is closed & mode is tags
+    // If menu is open, OptionList will take charge
+    // If mode isn't tags, press enter is not meaningful when you can't see any option
+    const onInternalSearchSubmit = (searchText: string) => {
+      // prevent empty tags from appearing when you click the Enter button
+      if (!searchText || !searchText.trim()) {
+        return;
+      }
+      onSearch(searchText, { source: 'submit' });
+    };
 
-  // KeyUp
-  const onInternalKeyUp: React.KeyboardEventHandler<HTMLDivElement> = (event, ...rest) => {
-    if (mergedOpen && listRef.current) {
-      listRef.current.onKeyUp(event, ...rest);
-    }
+    // Close will clean up single mode search text
+    React.useEffect(() => {
+      if (!mergedOpen && !multiple) {
+        onInternalSearch('', false, false);
+      }
+    }, [mergedOpen]);
 
-    onKeyUp?.(event, ...rest);
-  };
-
-  // ============================ Selector ============================
-  const onSelectorRemove = (val: ValueItemProps) => {
-    const newValues = displayValues.filter((i) => i !== val);
-
-    onDisplayValuesChange(newValues, {
-      type: 'remove',
-      values: [val],
-    });
-  };
-
-  // ========================== Focus / Blur ==========================
-  /** Record real focus status */
-  const focusRef = React.useRef<boolean>(false);
-
-  const onContainerFocus: React.FocusEventHandler<HTMLElement> = (...args) => {
-    setMockFocused(true);
-
-    if (!disabled) {
-      if (onFocus && !focusRef.current) {
-        onFocus(...args);
+    // ============================ Disabled ============================
+    // Close dropdown & remove focus state when disabled change
+    React.useEffect(() => {
+      if (innerOpen && disabled) {
+        setInnerOpen(false);
       }
 
-      // `showAction` should handle `focus` if set
-      if (showAction.includes('focus')) {
-        onToggleOpen(true);
+      if (disabled) {
+        setMockFocused(false);
       }
-    }
+    }, [disabled]);
 
-    focusRef.current = true;
-  };
+    // ============================ Keyboard ============================
+    /**
+     * We record input value here to check if can press to clean up by backspace
+     * - null: Key is not down, this is reset by key up
+     * - true: Search text is empty when first time backspace down
+     * - false: Search text is not empty when first time backspace down
+     */
+    const [getClearLock, setClearLock] = useLock();
 
-  const onContainerBlur: React.FocusEventHandler<HTMLElement> = (...args) => {
-    setMockFocused(false, () => {
-      focusRef.current = false;
-      onToggleOpen(false);
-    });
+    // KeyDown
+    const onInternalKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (event, ...rest) => {
+      const clearLock = getClearLock();
+      const { which } = event;
 
-    if (disabled) {
-      return;
-    }
+      if (which === KeyCode.ENTER) {
+        // Do not submit form when type in the input
+        event.preventDefault();
 
-    if (mergedSearchValue) {
-      // `tags` mode should move `searchValue` into values
-      if (mode === 'tags') {
-        onSearch(mergedSearchValue, { source: 'submit' });
+        // We only manage open state here, close logic should handle by list component
+        if (!mergedOpen) {
+          onToggleOpen(true);
+        }
       }
-    }
 
-    if (onBlur) {
-      onBlur(...args);
-    }
-  };
+      setClearLock(!!mergedSearchValue);
 
-  // Give focus back of Select
-  const activeTimeoutIds: any[] = [];
-  React.useEffect(
-    () => () => {
-      activeTimeoutIds.forEach((timeoutId) => clearTimeout(timeoutId));
-      activeTimeoutIds.splice(0, activeTimeoutIds.length);
-    },
-    [],
-  );
+      // Remove value by `backspace`
+      if (
+        which === KeyCode.BACKSPACE &&
+        !clearLock &&
+        multiple &&
+        !mergedSearchValue &&
+        displayValues.length
+      ) {
+        const cloneDisplayValues = [...displayValues];
+        let removedDisplayValue = null;
 
-  const onInternalMouseDown: React.MouseEventHandler<HTMLDivElement> = (event, ...restArgs) => {
-    const { target } = event;
-    const popupElement: HTMLDivElement = triggerRef.current?.getPopupElement();
+        for (let i = cloneDisplayValues.length - 1; i >= 0; i -= 1) {
+          const current = cloneDisplayValues[i];
 
-    // We should give focus back to selector if clicked item is not focusable
-    if (popupElement && popupElement.contains(target as HTMLElement)) {
-      const timeoutId = setTimeout(() => {
-        const index = activeTimeoutIds.indexOf(timeoutId);
-        if (index !== -1) {
-          activeTimeoutIds.splice(index, 1);
+          if (!current.disabled) {
+            cloneDisplayValues.splice(i, 1);
+            removedDisplayValue = current;
+            break;
+          }
         }
 
-        cancelSetMockFocused();
-
-        if (!mobile && !popupElement.contains(document.activeElement)) {
-          selectorRef.current?.focus();
+        if (removedDisplayValue) {
+          onDisplayValuesChange(cloneDisplayValues, {
+            type: 'remove',
+            values: [removedDisplayValue],
+          });
         }
+      }
+
+      if (mergedOpen && listRef.current) {
+        listRef.current.onKeyDown(event, ...rest);
+      }
+
+      onKeyDown?.(event, ...rest);
+    };
+
+    // KeyUp
+    const onInternalKeyUp: React.KeyboardEventHandler<HTMLDivElement> = (event, ...rest) => {
+      if (mergedOpen && listRef.current) {
+        listRef.current.onKeyUp(event, ...rest);
+      }
+
+      onKeyUp?.(event, ...rest);
+    };
+
+    // ============================ Selector ============================
+    const onSelectorRemove = (val: ValueItemProps) => {
+      const newValues = displayValues.filter((i) => i !== val);
+
+      onDisplayValuesChange(newValues, {
+        type: 'remove',
+        values: [val],
+      });
+    };
+
+    // ========================== Focus / Blur ==========================
+    /** Record real focus status */
+    const focusRef = React.useRef<boolean>(false);
+
+    const onContainerFocus: React.FocusEventHandler<HTMLElement> = (...args) => {
+      setMockFocused(true);
+
+      if (!disabled) {
+        if (onFocus && !focusRef.current) {
+          onFocus(...args);
+        }
+
+        // `showAction` should handle `focus` if set
+        if (showAction.includes('focus')) {
+          onToggleOpen(true);
+        }
+      }
+
+      focusRef.current = true;
+    };
+
+    const onContainerBlur: React.FocusEventHandler<HTMLElement> = (...args) => {
+      setMockFocused(false, () => {
+        focusRef.current = false;
+        onToggleOpen(false);
       });
 
-      activeTimeoutIds.push(timeoutId);
-    }
-
-    onMouseDown?.(event, ...restArgs);
-  };
-
-  // ============================ Dropdown ============================
-  const [containerWidth, setContainerWidth] = React.useState(null);
-
-  const [, forceUpdate] = React.useState({});
-  // We need force update here since popup dom is render async
-  function onPopupMouseEnter() {
-    forceUpdate({});
-  }
-
-  useLayoutEffect(() => {
-    if (triggerOpen) {
-      const newWidth = Math.ceil(containerRef.current?.offsetWidth);
-      if (containerWidth !== newWidth && !Number.isNaN(newWidth)) {
-        setContainerWidth(newWidth);
+      if (disabled) {
+        return;
       }
-    }
-  }, [triggerOpen]);
 
-  // Used for raw custom input trigger
-  let onTriggerVisibleChange: null | ((newOpen: boolean) => void);
-  if (customizeRawInputElement) {
-    onTriggerVisibleChange = (newOpen: boolean) => {
-      onToggleOpen(newOpen);
+      if (mergedSearchValue) {
+        // `tags` mode should move `searchValue` into values
+        if (mode === 'tags') {
+          onSearch(mergedSearchValue, { source: 'submit' });
+        }
+      }
+
+      if (onBlur) {
+        onBlur(...args);
+      }
     };
-  }
 
-  // Close when click on non-select element
-  useSelectTriggerControl(
-    () => [containerRef.current, triggerRef.current?.getPopupElement()],
-    triggerOpen,
-    onToggleOpen,
-  );
+    // Give focus back of Select
+    const activeTimeoutIds: any[] = [];
+    React.useEffect(
+      () => () => {
+        activeTimeoutIds.forEach((timeoutId) => clearTimeout(timeoutId));
+        activeTimeoutIds.splice(0, activeTimeoutIds.length);
+      },
+      [],
+    );
 
-  // ============================ Context =============================
-  const baseSelectContext = React.useMemo(
-    () => ({
-      ...props,
-      notFoundContent,
-      open: mergedOpen,
+    const onInternalMouseDown: React.MouseEventHandler<HTMLDivElement> = (event, ...restArgs) => {
+      const { target } = event;
+      const popupElement: HTMLDivElement = triggerRef.current?.getPopupElement();
+
+      // We should give focus back to selector if clicked item is not focusable
+      if (popupElement && popupElement.contains(target as HTMLElement)) {
+        const timeoutId = setTimeout(() => {
+          const index = activeTimeoutIds.indexOf(timeoutId);
+          if (index !== -1) {
+            activeTimeoutIds.splice(index, 1);
+          }
+
+          cancelSetMockFocused();
+
+          if (!mobile && !popupElement.contains(document.activeElement)) {
+            selectorRef.current?.focus();
+          }
+        });
+
+        activeTimeoutIds.push(timeoutId);
+      }
+
+      onMouseDown?.(event, ...restArgs);
+    };
+
+    // ============================ Dropdown ============================
+    const [containerWidth, setContainerWidth] = React.useState(null);
+
+    const [, forceUpdate] = React.useState({});
+    // We need force update here since popup dom is render async
+    function onPopupMouseEnter() {
+      forceUpdate({});
+    }
+
+    useLayoutEffect(() => {
+      if (triggerOpen) {
+        const newWidth = Math.ceil(containerRef.current?.offsetWidth);
+        if (containerWidth !== newWidth && !Number.isNaN(newWidth)) {
+          setContainerWidth(newWidth);
+        }
+      }
+    }, [triggerOpen]);
+
+    // Used for raw custom input trigger
+    let onTriggerVisibleChange: null | ((newOpen: boolean) => void);
+    if (customizeRawInputElement) {
+      onTriggerVisibleChange = (newOpen: boolean) => {
+        onToggleOpen(newOpen);
+      };
+    }
+
+    // Close when click on non-select element
+    useSelectTriggerControl(
+      () => [containerRef.current, triggerRef.current?.getPopupElement()],
       triggerOpen,
-      id,
-      showSearch: mergedShowSearch,
-      multiple,
-      toggleOpen: onToggleOpen,
-    }),
-    [props, notFoundContent, triggerOpen, mergedOpen, id, mergedShowSearch, multiple, onToggleOpen],
-  );
-
-  // ==================================================================
-  // ==                            Render                            ==
-  // ==================================================================
-
-  // ============================= Arrow ==============================
-  const mergedShowArrow = showArrow !== undefined ? showArrow : loading || !multiple;
-  let arrowNode: React.ReactNode;
-
-  if (mergedShowArrow) {
-    arrowNode = (
-      <TransBtn
-        className={classNames(`${prefixCls}-arrow`, {
-          [`${prefixCls}-arrow-loading`]: loading,
-        })}
-        customizeIcon={inputIcon}
-        customizeIconProps={{
-          loading,
-          searchValue: mergedSearchValue,
-          open: mergedOpen,
-          focused: mockFocused,
-          showSearch: mergedShowSearch,
-        }}
-      />
+      onToggleOpen,
     );
-  }
 
-  // ============================= Clear ==============================
-  let clearNode: React.ReactNode;
-  const onClearMouseDown: React.MouseEventHandler<HTMLSpanElement> = () => {
-    onClear?.();
-
-    onDisplayValuesChange([], {
-      type: 'clear',
-      values: displayValues,
-    });
-    onInternalSearch('', false, false);
-  };
-
-  if (!disabled && allowClear && (displayValues.length || mergedSearchValue)) {
-    clearNode = (
-      <TransBtn
-        className={`${prefixCls}-clear`}
-        onMouseDown={onClearMouseDown}
-        customizeIcon={clearIcon}
-        style={{ opacity: 1 }}
-      >
-        <CloseCircleFilled />
-      </TransBtn>
+    // ============================ Context =============================
+    const baseSelectContext = React.useMemo(
+      () => ({
+        ...props,
+        notFoundContent,
+        open: mergedOpen,
+        triggerOpen,
+        id,
+        showSearch: mergedShowSearch,
+        multiple,
+        toggleOpen: onToggleOpen,
+      }),
+      [
+        props,
+        notFoundContent,
+        triggerOpen,
+        mergedOpen,
+        id,
+        mergedShowSearch,
+        multiple,
+        onToggleOpen,
+      ],
     );
-  } else if (mode === 'date') {
-    clearNode = (
-      <TransBtn className={`${prefixCls}-clear`} style={{ opacity: 1 }} customizeIcon={clearIcon}>
-        <CalendarOutlined />
-      </TransBtn>
-    );
-  }
 
-  // // =========================== OptionList ===========================
-  // const optionList = <OptionList ref={listRef} />;
+    // ==================================================================
+    // ==                            Render                            ==
+    // ==================================================================
 
-  const panelNode: React.ReactNode = (
-    <PickerPanel<any>
-      // {...panelProps}
-      generateConfig={momentGenerateConfig}
-      // className={classNames({
-      //   [`${prefixCls}-panel-focused`]: !typing,
-      // })}
-      value={selectedValue}
-      locale={dateLocale}
-      tabIndex={-1}
-      onSelect={(date) => {
-        setSelectedValue(date);
-        onToggleOpen(false);
-        setInnerOpen(false);
-        onDatePicker(date);
-      }}
-      direction={direction}
-      // onPanelChange={(viewDate, mode) => {
-      //   const { onPanelChange } = props;
-      //   onLeave(true);
-      //   onPanelChange?.(viewDate, mode);
-      // }}
-    />
-  );
+    // ============================= Arrow ==============================
+    const mergedShowArrow = showArrow !== undefined ? showArrow : loading || !multiple;
+    let arrowNode: React.ReactNode;
 
-  // ============================= Select =============================
-  const mergedClassName = classNames(prefixCls, className, {
-    [`${prefixCls}-focused`]: mockFocused,
-    [`${prefixCls}-multiple`]: multiple,
-    [`${prefixCls}-single`]: !multiple,
-    [`${prefixCls}-allow-clear`]: allowClear,
-    [`${prefixCls}-show-arrow`]: mergedShowArrow,
-    [`${prefixCls}-disabled`]: disabled,
-    [`${prefixCls}-loading`]: loading,
-    [`${prefixCls}-open`]: mergedOpen,
-    [`${prefixCls}-customize-input`]: customizeInputElement,
-    [`${prefixCls}-show-search`]: mergedShowSearch,
-  });
-
-  // >>> Selector
-  const selectorNode = (
-    <SelectTrigger
-      ref={triggerRef}
-      disabled={disabled}
-      prefixCls={prefixCls}
-      visible={triggerOpen}
-      // @ts-ignore
-      popupElement={panelNode}
-      containerWidth={containerWidth}
-      animation={animation}
-      transitionName={transitionName}
-      dropdownStyle={dropdownStyle}
-      dropdownClassName={dropdownClassName}
-      direction={direction}
-      dropdownMatchSelectWidth={dropdownMatchSelectWidth}
-      dropdownRender={dropdownRender}
-      dropdownAlign={dropdownAlign}
-      placement={placement}
-      getPopupContainer={getPopupContainer}
-      empty={emptyOptions}
-      getTriggerDOMNode={() => selectorDomRef.current}
-      onPopupVisibleChange={onTriggerVisibleChange}
-      onPopupMouseEnter={onPopupMouseEnter}
-    >
-      {customizeRawInputElement ? (
-        React.cloneElement(customizeRawInputElement, {
-          ref: customizeRawInputRef,
-        })
-      ) : (
-        <Selector
-          {...props}
-          domRef={selectorDomRef}
-          prefixCls={prefixCls}
-          inputElement={customizeInputElement}
-          ref={selectorRef}
-          id={id}
-          showSearch={mergedShowSearch}
-          mode={mode}
-          activeDescendantId={activeDescendantId}
-          tagRender={tagRender}
-          values={displayValues}
-          open={mergedOpen}
-          onToggleOpen={onToggleOpen}
-          activeValue={activeValue}
-          searchValue={mergedSearchValue}
-          onSearch={onInternalSearch}
-          onSearchSubmit={onInternalSearchSubmit}
-          onRemove={onSelectorRemove}
-          tokenWithEnter={tokenWithEnter}
+    if (mergedShowArrow) {
+      arrowNode = (
+        <TransBtn
+          className={classNames(`${prefixCls}-arrow`, {
+            [`${prefixCls}-arrow-loading`]: loading,
+          })}
+          customizeIcon={inputIcon}
+          customizeIconProps={{
+            loading,
+            searchValue: mergedSearchValue,
+            open: mergedOpen,
+            focused: mockFocused,
+            showSearch: mergedShowSearch,
+          }}
         />
-      )}
-    </SelectTrigger>
-  );
+      );
+    }
 
-  // >>> Render
-  let renderNode: React.ReactNode;
+    // ============================= Clear ==============================
+    let clearNode: React.ReactNode;
+    const onClearMouseDown: React.MouseEventHandler<HTMLSpanElement> = () => {
+      onClear?.();
 
-  // Render raw
-  if (customizeRawInputElement) {
-    renderNode = selectorNode;
-  } else {
-    renderNode = (
-      <div
-        className={mergedClassName}
-        {...domProps}
-        ref={containerRef}
-        onMouseDown={onInternalMouseDown}
-        onKeyDown={onInternalKeyDown}
-        onKeyUp={onInternalKeyUp}
-        onFocus={onContainerFocus}
-        onBlur={onContainerBlur}
-        onClick={(e: any) => {
-          if (onClick && !disabled) {
-            onClick(e);
+      onDisplayValuesChange([], {
+        type: 'clear',
+        values: displayValues,
+      });
+      onInternalSearch('', false, false);
+    };
+
+    if (!disabled && allowClear && (displayValues.length || mergedSearchValue)) {
+      clearNode = (
+        <TransBtn
+          className={`${prefixCls}-clear`}
+          onMouseDown={onClearMouseDown}
+          customizeIcon={clearIcon}
+          style={{ opacity: 1 }}
+        >
+          <CloseCircleFilled />
+        </TransBtn>
+      );
+    } else if (mode === 'date') {
+      clearNode = (
+        <TransBtn className={`${prefixCls}-clear`} style={{ opacity: 1 }} customizeIcon={clearIcon}>
+          <CalendarOutlined />
+        </TransBtn>
+      );
+    }
+
+    // // =========================== OptionList ===========================
+    // const optionList = <OptionList ref={listRef} />;
+
+    const panelNode: React.ReactNode = (
+      <PickerPanel<Moment>
+        // {...panelProps}
+        generateConfig={momentGenerateConfig}
+        // className={classNames({
+        //   [`${prefixCls}-panel-focused`]: !typing,
+        // })}
+        mode={dateMode}
+        picker={datePicker}
+        value={selectedValue}
+        locale={dateLocale}
+        tabIndex={-1}
+        onSelect={(date, forceTriggerSelect: boolean) => {
+          setSelectedValue(date);
+          onDatePicker(date);
+          if ((showTime && forceTriggerSelect) || !showTime) {
+            onToggleOpen(false);
+            setInnerOpen(false);
           }
         }}
-      >
-        {mockFocused && !mergedOpen && (
-          <span
-            style={{
-              width: 0,
-              height: 0,
-              display: 'flex',
-              overflow: 'hidden',
-              opacity: 0,
-            }}
-            aria-live="polite"
-          >
-            {/* Merge into one string to make screen reader work as expect */}
-            {`${displayValues
-              .map(({ label, value }) =>
-                ['number', 'string'].includes(typeof label) ? label : value,
-              )
-              .join(', ')}`}
-          </span>
-        )}
-        {selectorNode}
-
-        {arrowNode}
-        {clearNode}
-      </div>
+        showTime={showTime}
+        direction={direction}
+        // onPanelChange={(viewDate, mode) => {
+        //   console.log(viewDate, mode);
+        // }}
+      />
     );
-  }
 
-  return (
-    <BaseSelectContext.Provider value={baseSelectContext}>{renderNode}</BaseSelectContext.Provider>
-  );
-});
+    // ============================= Select =============================
+    const mergedClassName = classNames(prefixCls, className, {
+      [`${prefixCls}-focused`]: mockFocused,
+      [`${prefixCls}-multiple`]: multiple,
+      [`${prefixCls}-single`]: !multiple,
+      [`${prefixCls}-allow-clear`]: allowClear,
+      [`${prefixCls}-show-arrow`]: mergedShowArrow,
+      [`${prefixCls}-disabled`]: disabled,
+      [`${prefixCls}-loading`]: loading,
+      [`${prefixCls}-open`]: mergedOpen,
+      [`${prefixCls}-customize-input`]: customizeInputElement,
+      [`${prefixCls}-show-search`]: mergedShowSearch,
+    });
+
+    // >>> Selector
+    const selectorNode = (
+      <SelectTrigger
+        ref={triggerRef}
+        disabled={disabled}
+        prefixCls={prefixCls}
+        visible={triggerOpen}
+        // @ts-ignore
+        popupElement={panelNode}
+        containerWidth={containerWidth}
+        animation={animation}
+        transitionName={transitionName}
+        dropdownStyle={dropdownStyle}
+        dropdownClassName={dropdownClassName}
+        direction={direction}
+        dropdownMatchSelectWidth={dropdownMatchSelectWidth}
+        dropdownRender={dropdownRender}
+        dropdownAlign={dropdownAlign}
+        placement={placement}
+        getPopupContainer={getPopupContainer}
+        empty={emptyOptions}
+        getTriggerDOMNode={() => selectorDomRef.current}
+        onPopupVisibleChange={onTriggerVisibleChange}
+        onPopupMouseEnter={onPopupMouseEnter}
+      >
+        {customizeRawInputElement ? (
+          React.cloneElement(customizeRawInputElement, {
+            ref: customizeRawInputRef,
+          })
+        ) : (
+          <Selector
+            {...props}
+            domRef={selectorDomRef}
+            prefixCls={prefixCls}
+            inputElement={customizeInputElement}
+            ref={selectorRef}
+            id={id}
+            showSearch={mergedShowSearch}
+            mode={mode}
+            activeDescendantId={activeDescendantId}
+            tagRender={tagRender}
+            values={displayValues}
+            open={mergedOpen}
+            onToggleOpen={onToggleOpen}
+            activeValue={activeValue}
+            searchValue={mergedSearchValue}
+            onSearch={onInternalSearch}
+            onSearchSubmit={onInternalSearchSubmit}
+            onRemove={onSelectorRemove}
+            tokenWithEnter={tokenWithEnter}
+          />
+        )}
+      </SelectTrigger>
+    );
+
+    // >>> Render
+    let renderNode: React.ReactNode;
+
+    // Render raw
+    if (customizeRawInputElement) {
+      renderNode = selectorNode;
+    } else {
+      renderNode = (
+        <div
+          className={mergedClassName}
+          {...domProps}
+          ref={containerRef}
+          onMouseDown={onInternalMouseDown}
+          onKeyDown={onInternalKeyDown}
+          onKeyUp={onInternalKeyUp}
+          onFocus={onContainerFocus}
+          onBlur={onContainerBlur}
+          onClick={(e: any) => {
+            if (onClick && !disabled) {
+              onClick(e);
+            }
+          }}
+        >
+          {mockFocused && !mergedOpen && (
+            <span
+              style={{
+                width: 0,
+                height: 0,
+                display: 'flex',
+                overflow: 'hidden',
+                opacity: 0,
+              }}
+              aria-live="polite"
+            >
+              {/* Merge into one string to make screen reader work as expect */}
+              {`${displayValues
+                .map(({ label, value }) =>
+                  ['number', 'string'].includes(typeof label) ? label : value,
+                )
+                .join(', ')}`}
+            </span>
+          )}
+          {selectorNode}
+
+          {arrowNode}
+          {clearNode}
+        </div>
+      );
+    }
+
+    return (
+      <BaseSelectContext.Provider value={baseSelectContext}>
+        {renderNode}
+      </BaseSelectContext.Provider>
+    );
+  },
+);
 
 // Set display name for dev
 // @ts-ignore
