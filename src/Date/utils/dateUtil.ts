@@ -1,6 +1,7 @@
 import { DECADE_UNIT_DIFF } from '../panels/DecadePanel/index';
 import type { PanelMode, NullableDateType, PickerMode, Locale, CustomFormat } from '../interface';
 import type { GenerateConfig } from '../generate';
+import type { SharedTimeProps } from '../panels/TimePanel';
 
 export const WEEK_DAY_COUNT = 7;
 
@@ -318,4 +319,59 @@ export function getCellDateDisabled<DateType>({
       return getDisabledFromRange('year', startYear, endYear);
     }
   }
+}
+
+function toArray<T>(list: T | T[]): T[] {
+  if (!list) {
+    return [];
+  }
+  return Array.isArray(list) ? list : [list];
+}
+
+/**
+ * 计算时间弹框的类型，根据 format 的内容，自动计算是否显示 秒列表或者是分列表
+ * @param props
+ * @returns
+ */
+export function getTimeProps<DateType, DisabledTime>(
+  props: { format?: string; picker?: PickerMode } & Omit<
+    SharedTimeProps<DateType>,
+    'disabledTime'
+  > & {
+      disabledTime?: DisabledTime;
+    },
+) {
+  const { format, picker, showHour, showMinute, showSecond, use12Hours } = props;
+
+  const firstFormat = toArray(format)[0];
+  const showTimeObj = { ...props };
+
+  if (firstFormat && typeof firstFormat === 'string') {
+    if (!firstFormat.includes('s') && showSecond === undefined) {
+      showTimeObj.showSecond = false;
+    }
+    if (!firstFormat.includes('m') && showMinute === undefined) {
+      showTimeObj.showMinute = false;
+    }
+    if (!firstFormat.includes('H') && !firstFormat.includes('h') && showHour === undefined) {
+      showTimeObj.showHour = false;
+    }
+
+    if ((firstFormat.includes('a') || firstFormat.includes('A')) && use12Hours === undefined) {
+      showTimeObj.use12Hours = true;
+    }
+  }
+
+  if (picker === 'time') {
+    return showTimeObj;
+  }
+
+  if (typeof firstFormat === 'function') {
+    // format of showTime should use default when format is custom format function
+    delete showTimeObj.format;
+  }
+
+  return {
+    showTime: showTimeObj,
+  };
 }

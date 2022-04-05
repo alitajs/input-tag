@@ -268,13 +268,13 @@ function Overflow<ItemType = any>(props: OverflowProps<ItemType>, ref: React.Ref
     responsive: isResponsive,
     component: itemComponent,
     invalidate,
+    display: true,
   };
 
   // >>>>> Choice render fun by `renderRawItem`
   const internalRenderItemNode = renderRawItem
     ? (item: ItemType, index: number) => {
         const key = getKey(item, index);
-
         return (
           <OverflowContext.Provider
             key={key}
@@ -284,7 +284,6 @@ function Overflow<ItemType = any>(props: OverflowProps<ItemType>, ref: React.Ref
               item,
               itemKey: key,
               registerSize,
-              display: index <= mergedDisplayCount,
             }}
           >
             {renderRawItem(item, index)}
@@ -302,6 +301,7 @@ function Overflow<ItemType = any>(props: OverflowProps<ItemType>, ref: React.Ref
             </span>
           );
         }
+
         return (
           <Tag
             {...itemSharedProps}
@@ -311,7 +311,6 @@ function Overflow<ItemType = any>(props: OverflowProps<ItemType>, ref: React.Ref
             renderItem={mergedRenderItem}
             itemKey={key}
             registerSize={registerSize}
-            display
           />
         );
       };
@@ -322,7 +321,7 @@ function Overflow<ItemType = any>(props: OverflowProps<ItemType>, ref: React.Ref
     order: displayRest ? mergedDisplayCount : Number.MAX_SAFE_INTEGER,
     className: `${itemPrefixCls}-rest`,
     registerSize: registerOverflowSize,
-    display: displayRest,
+    display: true,
   };
 
   if (!renderRawRest) {

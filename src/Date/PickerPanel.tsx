@@ -503,7 +503,6 @@ function PickerPanel<DateType>(props: PickerPanelProps<DateType>) {
       onNow: needConfirmButton && onNow,
       onOk: () => {
         if (mergedValue) {
-          console.log(mergedValue);
           triggerSelect(mergedValue, 'submit', true);
           if (onOk) {
             onOk(mergedValue);

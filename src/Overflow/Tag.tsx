@@ -40,8 +40,6 @@ function InternalItem<ItemType>(props: ItemProps<ItemType>, ref: React.Ref<any>)
     ...restProps
   } = props;
 
-  // console.log(props);
-
   const mergedHidden = responsive && !display;
 
   // ================================ Effect ================================
@@ -58,7 +56,6 @@ function InternalItem<ItemType>(props: ItemProps<ItemType>, ref: React.Ref<any>)
 
   // ================================ Render ================================
   const childNode = renderItem && item !== UNDEFINED ? renderItem(item) : children;
-
   let overflowStyle: React.CSSProperties | undefined;
   if (!invalidate) {
     overflowStyle = {

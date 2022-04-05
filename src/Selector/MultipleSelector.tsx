@@ -223,7 +223,7 @@ const SelectSelector: React.FC<SelectorProps> = (props) => {
       renderItem={renderItem}
       renderRest={renderRest}
       suffix={editable ? inputNode : undefined}
-      itemKey="key"
+      itemKey="value"
       maxCount={maxTagCount}
     />
   );

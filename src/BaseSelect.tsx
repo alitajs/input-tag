@@ -27,6 +27,7 @@ import { dateLocale } from './Date/utils/localeUtil';
 import CloseCircleFilled from '@ant-design/icons/CloseCircleFilled';
 import CalendarOutlined from '@ant-design/icons/CalendarOutlined';
 import type { IDatePickerProps } from './interface';
+import { getTimeProps } from './Date/utils/dateUtil';
 
 const DEFAULT_OMIT_PROPS = [
   'value',
@@ -302,7 +303,9 @@ const BaseSelect = React.forwardRef(
       onMouseDown,
       onDatePicker,
 
+      // >>> date
       showTime,
+      format,
 
       // Rest Props
       ...restProps
@@ -744,13 +747,18 @@ const BaseSelect = React.forwardRef(
     // // =========================== OptionList ===========================
     // const optionList = <OptionList ref={listRef} />;
 
+    const panelProps = {
+      // @ts-ignore
+      ...(showTime ? getTimeProps({ format, picker: datePicker, ...showTime }) : {}),
+    } as any;
     const panelNode: React.ReactNode = (
       <PickerPanel<Moment>
-        // {...panelProps}
+        {...panelProps}
         generateConfig={momentGenerateConfig}
         // className={classNames({
         //   [`${prefixCls}-panel-focused`]: !typing,
         // })}
+        format={format}
         mode={dateMode}
         picker={datePicker}
         value={selectedValue}
@@ -764,7 +772,6 @@ const BaseSelect = React.forwardRef(
             setInnerOpen(false);
           }
         }}
-        showTime={showTime}
         direction={direction}
         // onPanelChange={(viewDate, mode) => {
         //   console.log(viewDate, mode);

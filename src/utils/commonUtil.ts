@@ -23,24 +23,33 @@ export const getRandom = () => {
   return val;
 };
 
-export const defaultFormat = (datePicker: DatePickerProps, showTime: boolean) => {
+/**
+ * 设置默认的 format 和 showTime
+ * @param datePicker
+ * @param showTime
+ * @returns
+ */
+export const defaultFormat = (datePicker: DatePickerProps, showTime: boolean | object) => {
   let format = '';
   switch (datePicker) {
     case 'date':
       format = 'YYYY-MM-DD';
-      if (showTime) format = 'YYYY-MM-DD HH:mm';
+      if (showTime) format = 'YYYY-MM-DD HH:mm:ss';
       break;
-    case 'week':
-      format = 'YYYY-MM-DD';
-      break;
+    // case 'week':
+    //   format = 'YYYY-MM-DD';
+    //   break;
     case 'month':
       format = 'YYYY-MM';
       break;
-    case 'quarter':
-      format = 'YYYY-MM-DD';
-      break;
+    // case 'quarter':
+    //   format = 'YYYY-MM-DD';
+    //   break;
     case 'year':
       format = 'YYYY';
+      break;
+    default:
+      format = 'YYYY-MM-DD';
       break;
   }
 

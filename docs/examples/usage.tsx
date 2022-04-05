@@ -38,6 +38,7 @@ const Test: React.FC = () => {
         style={{ width: 500 }}
         value={value}
         onChange={(val: ValueItemProps[]) => {
+          console.log(val);
           setValue(val);
         }}
         onClick={() => console.log('this is click')}

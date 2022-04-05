@@ -113,7 +113,8 @@ export interface SelectProps<ValueType = any, OptionType extends BaseOptionType 
   addOnAfter?: React.ReactNode;
   editable?: boolean; // 输入框是否可编辑
   onChange?: (value: ValueType, option: OptionType | OptionType[]) => void;
-  format?: string;
+
+  // >>> date
   dateMode?: DateModeProps;
   datePicker?: DatePickerProps;
 }
@@ -451,6 +452,7 @@ const Select = React.forwardRef(
             // >>> Date
             showTime={showTime}
             datePicker={datePicker}
+            format={format}
             // >>> MISC
             id={mergedId}
             prefixCls={prefixCls}

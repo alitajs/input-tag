@@ -27,6 +27,7 @@ const Test: React.FC = () => {
         allowClear={allowClear}
         disabled={disabled}
         showTime={showTime}
+        // format="YYYY-MM-DD HH:mm"
         datePicker="date"
       />
       <div style={{ height: '20px' }} />

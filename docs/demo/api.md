@@ -1,20 +1,12 @@
 ---
-title: input-tag
+title: API
 group:
-  title: input-tag
+  title: API
 nav:
-  title: 组件
-  path: /usage
-  order: 2
+  title: API
+  path: /api
+  order: 3
 ---
-
-## Tags
-
-<code src="../examples/usage.tsx">
-
-## Date
-
-<code src="../examples/date.tsx">
 
 ## API
 
@@ -32,10 +24,10 @@ nav:
 
 ### Date
 
-| 参数 | 说明 | 类型 | 默认值 | 是否必填 |
-| --- | --- | --- | --- | --- |
-| showTime | 是否显示时间 | boolean | false | 否 |
-| datePicker | 时间选择器类型 | `date` \| `week` \| `month` \| `quarter` \| `year` | `date` | 否 |
+| 参数       | 说明           | 类型                                  | 默认值 | 是否必填 |
+| ---------- | -------------- | ------------------------------------- | ------ | -------- |
+| showTime   | 是否显示时间   | boolean                               | false  | 否       |
+| datePicker | 时间选择器类型 | `date` \| `week` \| `month` \| `year` | `date` | 否       |
 
 ### ValueItemProps
 

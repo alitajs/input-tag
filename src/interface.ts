@@ -3,8 +3,8 @@ import type { PickerPanelDateProps } from 'rc-picker/lib/PickerPanel';
 import type { Moment } from 'moment';
 import type { RawValueType } from './BaseSelect';
 
-export interface IDatePickerProps extends Omit<PickerPanelDateProps<Moment>, 'mode' | 'showTime'> {
-  showTime: boolean;
+export interface IDatePickerProps extends Omit<PickerPanelDateProps<Moment>, 'mode'> {
+  format: string;
 }
 
 export interface FlattenOptionData<OptionType> {
