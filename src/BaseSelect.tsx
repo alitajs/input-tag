@@ -306,6 +306,7 @@ const BaseSelect = React.forwardRef(
       // >>> date
       showTime,
       format,
+      disabledDate,
 
       // Rest Props
       ...restProps
@@ -750,6 +751,7 @@ const BaseSelect = React.forwardRef(
     const panelProps = {
       // @ts-ignore
       ...(showTime ? getTimeProps({ format, picker: datePicker, ...showTime }) : {}),
+      disabledDate,
     } as any;
     const panelNode: React.ReactNode = (
       <PickerPanel<Moment>
